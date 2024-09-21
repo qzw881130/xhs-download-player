@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View } from 'react-native';
 import { BottomNavigation } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -21,15 +21,27 @@ function MainScreen() {
         { key: 'about', title: '关于', icon: 'information' },
     ]);
     const [selectedVideo, setSelectedVideo] = useState(null);
+    const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
 
-    const handleVideoPress = (video) => {
+    const handleVideoPress = useCallback((video) => {
         setSelectedVideo(video);
-    };
+        setSelectedVideoIndex(mockData.findIndex(v => v.id === video.id));
+    }, []);
 
-    const handleClosePlayer = () => {
-        console.log('Closing player'); // 添加这行来调试
+    const handleClosePlayer = useCallback(() => {
+        console.log('Closing player');
         setSelectedVideo(null);
-    };
+        setSelectedVideoIndex(0);
+    }, []);
+
+    const handleNextVideo = useCallback(() => {
+        const nextIndex = (selectedVideoIndex + 1) % mockData.length;
+        console.log('selectedVideoIndex:', selectedVideoIndex, 'nextIndex:', nextIndex);
+        const nextVideo = mockData[nextIndex];
+        setSelectedVideoIndex(nextIndex);
+        setSelectedVideo(nextVideo);
+        console.log('Fetching next video:', nextVideo.title);
+    }, [selectedVideoIndex]);
 
     const renderScene = BottomNavigation.SceneMap({
         liked: () => <VideoListPage title="我的点赞视频" count={mockData.length} data={mockData} onVideoPress={handleVideoPress} />,
@@ -43,9 +55,13 @@ function MainScreen() {
     };
 
     if (selectedVideo) {
-        return <VideoPlayerPage video={selectedVideo} onClose={handleClosePlayer} />;
+        return <VideoPlayerPage
+            key={selectedVideo.id}
+            video={selectedVideo}
+            onClose={handleClosePlayer}
+            onNextVideo={handleNextVideo}
+        />;
     }
-
     return (
         <BottomNavigation
             navigationState={{ index, routes }}
