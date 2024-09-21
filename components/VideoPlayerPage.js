@@ -3,6 +3,7 @@ import { View, StyleSheet, Dimensions, Image, TouchableOpacity } from 'react-nat
 import { Appbar, IconButton, Text } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 
@@ -34,13 +35,18 @@ export const VideoPlayerPage = ({ video, onClose }) => {
                     <Text style={styles.title}>{video.title}</Text>
                 </View>
             </View>
-            <Appbar.Header style={styles.header}>
-                <TouchableOpacity onPress={handleBackPress}>
-                    <Appbar.BackAction color="white" />
-                </TouchableOpacity>
-                <Appbar.Content title="" />
-                <Appbar.Action icon="cog" onPress={() => console.log('Settings pressed')} color="white" />
-            </Appbar.Header>
+            <LinearGradient
+                colors={['rgba(0,0,0,0.7)', 'transparent']}
+                style={styles.headerGradient}
+            >
+                <Appbar.Header style={styles.header}>
+                    <TouchableOpacity onPress={handleBackPress}>
+                        <Appbar.BackAction color="white" />
+                    </TouchableOpacity>
+                    <Appbar.Content title="" />
+                    <Appbar.Action icon="cog" onPress={() => console.log('Settings pressed')} color="white" />
+                </Appbar.Header>
+            </LinearGradient>
         </View>
     );
 };
@@ -56,16 +62,17 @@ const styles = StyleSheet.create({
         height: height,
         resizeMode: 'cover',
     },
-    overlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-    },
     content: {
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    headerGradient: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 100, // 调整这个值以适应你的需求
     },
     header: {
         backgroundColor: 'transparent',
