@@ -5,6 +5,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Video } from 'expo-av';
 
 const { width, height } = Dimensions.get('window');
 
@@ -18,6 +19,8 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     const [playOrder, setPlayOrder] = useState('order');
     const [playSpeed, setPlaySpeed] = useState('1x');
     const [autoPlay, setAutoPlay] = useState(true);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const videoRef = useRef(null);
 
     useEffect(() => {
         // Load saved settings when component mounts
@@ -115,6 +118,25 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
         });
     };
 
+    const handlePlayPress = async () => {
+        if (videoRef.current) {
+            if (isPlaying) {
+                await videoRef.current.pauseAsync();
+            } else {
+                await videoRef.current.playAsync();
+            }
+            setIsPlaying(!isPlaying);
+        }
+    };
+
+    const onVideoEnd = async () => {
+        if (playMode === 'single') {
+            await videoRef.current.replayAsync();
+        } else if (playMode === 'auto') {
+            onNextVideo();
+        }
+    };
+
     useEffect(() => {
         console.log('Video changed:', video.title);
     }, [video]);
@@ -122,13 +144,30 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     return (
         <View style={styles.container} {...panResponder.panHandlers}>
             <StatusBar style="light" translucent backgroundColor="transparent" />
-            <Image source={{ uri: video.image }} style={styles.cover} />
+            {video.videoUrl ? (
+                <Video
+                    ref={videoRef}
+                    source={{ uri: video.videoUrl }}
+                    style={styles.video}
+                    resizeMode="contain"
+                    isLooping={playMode === 'single'}
+                    onPlaybackStatusUpdate={(status) => {
+                        if (status.didJustFinish) {
+                            onVideoEnd();
+                        }
+                    }}
+                    rate={parseFloat(playSpeed)}
+                    shouldPlay={isPlaying}
+                />
+            ) : (
+                <Image source={{ uri: video.image }} style={styles.cover} />
+            )}
             <View style={styles.content}>
                 <IconButton
-                    icon="play"
+                    icon={isPlaying ? "pause" : "play"}
                     size={50}
                     style={styles.playButton}
-                    onPress={() => console.log('Play video pressed')}
+                    onPress={handlePlayPress}
                     color="white"
                 />
                 <View style={styles.titleContainer}>
@@ -360,5 +399,10 @@ const styles = StyleSheet.create({
         bottom: 0,
         backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'flex-end',
+    },
+    video: {
+        ...StyleSheet.absoluteFillObject,
+        width: width,
+        height: height,
     },
 });
