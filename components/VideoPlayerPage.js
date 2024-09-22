@@ -4,6 +4,7 @@ import { Appbar, IconButton, Text, Drawer, List, Button, Divider, SegmentedButto
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -13,6 +14,44 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     const [isSettingsVisible, setIsSettingsVisible] = useState(false);
     const [activeSettings, setActiveSettings] = useState('');
     const slideAnim = useRef(new Animated.Value(300)).current; // Start from 300 (off-screen)
+    const [playMode, setPlayMode] = useState('single');
+    const [playOrder, setPlayOrder] = useState('order');
+
+    useEffect(() => {
+        // Load saved settings when component mounts
+        loadSettings();
+    }, []);
+
+    const loadSettings = async () => {
+        try {
+            const savedPlayMode = await AsyncStorage.getItem('playMode');
+            const savedPlayOrder = await AsyncStorage.getItem('playOrder');
+            if (savedPlayMode) setPlayMode(savedPlayMode);
+            if (savedPlayOrder) setPlayOrder(savedPlayOrder);
+        } catch (error) {
+            console.error('Error loading settings:', error);
+        }
+    };
+
+    const saveSettings = async (key, value) => {
+        try {
+            await AsyncStorage.setItem(key, value);
+        } catch (error) {
+            console.error('Error saving settings:', error);
+        }
+    };
+
+    const handlePlayModeChange = (value) => {
+        setPlayMode(value);
+        saveSettings('playMode', value);
+        console.log(`Play mode changed to: ${value}`);
+    };
+
+    const handlePlayOrderChange = (value) => {
+        setPlayOrder(value);
+        saveSettings('playOrder', value);
+        console.log(`Play order changed to: ${value}`);
+    };
 
     const panResponder = useRef(
         PanResponder.create({
@@ -134,18 +173,24 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                                     <Text style={styles.settingLabel}>播放模式</Text>
                                     <View style={styles.settingControl}>
                                         <RadioButton.Group
-                                            onValueChange={value => console.log(`${value} selected`)}
-                                            value="single"
+                                            onValueChange={handlePlayModeChange}
+                                            value={playMode}
                                         >
                                             <View style={styles.radioButtonGroup}>
-                                                <View style={styles.radioButtonRow}>
+                                                <TouchableOpacity
+                                                    style={styles.radioButtonRow}
+                                                    onPress={() => handlePlayModeChange('single')}
+                                                >
                                                     <RadioButton value="single" />
                                                     <Text style={styles.radioButtonLabel}>单视频循环</Text>
-                                                </View>
-                                                <View style={styles.radioButtonRow}>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity
+                                                    style={styles.radioButtonRow}
+                                                    onPress={() => handlePlayModeChange('auto')}
+                                                >
                                                     <RadioButton value="auto" />
                                                     <Text style={styles.radioButtonLabel}>自动播放下一个</Text>
-                                                </View>
+                                                </TouchableOpacity>
                                             </View>
                                         </RadioButton.Group>
                                     </View>
@@ -155,18 +200,24 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                                     <Text style={styles.settingLabel}>播放顺序</Text>
                                     <View style={styles.settingControl}>
                                         <RadioButton.Group
-                                            onValueChange={value => console.log(`${value} selected`)}
-                                            value="order"
+                                            onValueChange={handlePlayOrderChange}
+                                            value={playOrder}
                                         >
                                             <View style={styles.radioButtonGroup}>
-                                                <View style={styles.radioButtonRow}>
+                                                <TouchableOpacity
+                                                    style={styles.radioButtonRow}
+                                                    onPress={() => handlePlayOrderChange('order')}
+                                                >
                                                     <RadioButton value="order" />
                                                     <Text style={styles.radioButtonLabel}>顺序播放</Text>
-                                                </View>
-                                                <View style={styles.radioButtonRow}>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity
+                                                    style={styles.radioButtonRow}
+                                                    onPress={() => handlePlayOrderChange('random')}
+                                                >
                                                     <RadioButton value="random" />
                                                     <Text style={styles.radioButtonLabel}>随机播放</Text>
-                                                </View>
+                                                </TouchableOpacity>
                                             </View>
                                         </RadioButton.Group>
                                     </View>
@@ -270,7 +321,9 @@ const styles = StyleSheet.create({
     radioButtonRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginLeft: 10, // 给每个选项之间添加一些间距
+        marginLeft: 10,
+        paddingVertical: 8,  // 增加可点击区域
+        paddingHorizontal: 5,  // 增加可点击区域
     },
     radioButtonLabel: {
         marginLeft: 4,
