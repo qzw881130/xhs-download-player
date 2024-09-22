@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, StyleSheet, Dimensions, Image, TouchableOpacity, PanResponder, TouchableWithoutFeedback } from 'react-native';
+import { View, StyleSheet, Dimensions, Image, TouchableOpacity, PanResponder, TouchableWithoutFeedback, Animated } from 'react-native';
 import { Appbar, IconButton, Text, Drawer, List, Button, Divider, SegmentedButtons, RadioButton, Switch } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -12,6 +12,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     const [lastSwipeTime, setLastSwipeTime] = useState(0);
     const [isSettingsVisible, setIsSettingsVisible] = useState(false);
     const [activeSettings, setActiveSettings] = useState('');
+    const slideAnim = useRef(new Animated.Value(300)).current; // Start from 300 (off-screen)
 
     const panResponder = useRef(
         PanResponder.create({
@@ -40,10 +41,21 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
 
     const handleSettingsPress = () => {
         setIsSettingsVisible(true);
+        Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
     };
 
     const closeSettings = () => {
-        setIsSettingsVisible(false);
+        Animated.timing(slideAnim, {
+            toValue: 300,
+            duration: 300,
+            useNativeDriver: true,
+        }).start(() => {
+            setIsSettingsVisible(false);
+        });
     };
 
     useEffect(() => {
@@ -82,7 +94,14 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                 <TouchableWithoutFeedback onPress={closeSettings}>
                     <View style={styles.overlay}>
                         <TouchableWithoutFeedback>
-                            <View style={styles.drawerContainer}>
+                            <Animated.View
+                                style={[
+                                    styles.drawerContainer,
+                                    {
+                                        transform: [{ translateY: slideAnim }],
+                                    },
+                                ]}
+                            >
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                                     <Text style={{ color: '#000', fontSize: 18 }}>控制面板</Text>
                                     <TouchableOpacity onPress={() => setIsSettingsVisible(false)}>
@@ -90,7 +109,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                                             icon="close"
                                             size={24}
                                             color="#000"
-                                            onPress={() => setIsSettingsVisible(false)}
+                                            onPress={closeSettings}
                                         />
                                     </TouchableOpacity>
                                 </View>
@@ -159,7 +178,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                                         <Switch value={true} onValueChange={(value) => console.log(`Auto play ${value}`)} />
                                     </View>
                                 </View>
-                            </View>
+                            </Animated.View>
                         </TouchableWithoutFeedback>
                     </View>
                 </TouchableWithoutFeedback>
@@ -216,7 +235,6 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        // height: 200, // 调整抽屉的高度
         backgroundColor: 'white',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
