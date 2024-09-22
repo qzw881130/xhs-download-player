@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { View, FlatList, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
-import { Appbar, Searchbar, Text, Card, Button, Menu } from 'react-native-paper';
+import { Appbar, Text, Card, Button, Menu } from 'react-native-paper';
+import SearchModal from './SearchModal';
 
 const { width } = Dimensions.get('window');
-const COLUMN_WIDTH = (width - 24) / 2; // 24 is the total horizontal padding
+const COLUMN_WIDTH = (width - 24) / 2;
 
 export const VideoListPage = ({ title, count, data, onVideoPress }) => {
-    const [searchQuery, setSearchQuery] = useState('');
     const [page, setPage] = useState(1);
     const [menuVisible, setMenuVisible] = useState(false);
-    const itemsPerPage = 10; // 假设每页显示10个项目
+    const [searchVisible, setSearchVisible] = useState(false);
+    const [filteredData, setFilteredData] = useState(data);
+    const itemsPerPage = 10;
 
     const onChangeSearch = query => setSearchQuery(query);
 
@@ -24,28 +26,27 @@ export const VideoListPage = ({ title, count, data, onVideoPress }) => {
         </TouchableOpacity>
     );
 
-    const totalPages = Math.ceil(data.length / itemsPerPage);
-
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const openMenu = () => setMenuVisible(true);
     const closeMenu = () => setMenuVisible(false);
-
     const pageOptions = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+    const handleSearch = (query) => {
+        const filtered = data.filter(item =>
+            item.title.toLowerCase().includes(query.toLowerCase())
+        );
+        setFilteredData(filtered);
+        setPage(1);
+    };
 
     return (
         <View style={styles.container}>
             <Appbar.Header>
                 <Appbar.Content title={title} subtitle={count > 0 ? `共${count}个` : undefined} />
+                <Appbar.Action icon="magnify" onPress={() => setSearchVisible(true)} />
             </Appbar.Header>
-            {title !== "关于" && (
-                <Searchbar
-                    placeholder="搜索"
-                    onChangeText={onChangeSearch}
-                    value={searchQuery}
-                    style={styles.searchbar}
-                />
-            )}
             <FlatList
-                data={data.slice((page - 1) * itemsPerPage, page * itemsPerPage)}
+                data={filteredData.slice((page - 1) * itemsPerPage, page * itemsPerPage)}
                 renderItem={renderItem}
                 keyExtractor={item => item.id}
                 numColumns={2}
@@ -88,6 +89,13 @@ export const VideoListPage = ({ title, count, data, onVideoPress }) => {
                     </Button>
                 </View>
             )}
+            <SearchModal
+                visible={searchVisible}
+                onDismiss={() => setSearchVisible(false)}
+                onSearch={handleSearch}
+                data={data}
+                onVideoPress={onVideoPress}
+            />
         </View>
     );
 };
@@ -95,9 +103,6 @@ export const VideoListPage = ({ title, count, data, onVideoPress }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
-    searchbar: {
-        margin: 8,
     },
     row: {
         justifyContent: 'space-between',
@@ -108,7 +113,7 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     cardImage: {
-        height: COLUMN_WIDTH * 1.5, // 假设图片比例为2:3
+        height: COLUMN_WIDTH * 1.5,
     },
     cardTitle: {
         fontSize: 14,
