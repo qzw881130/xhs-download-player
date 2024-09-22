@@ -23,9 +23,11 @@ function MainScreen() {
     const [selectedVideo, setSelectedVideo] = useState(null);
     const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
 
-    const handleVideoPress = useCallback((video) => {
-        setSelectedVideo(video);
-        setSelectedVideoIndex(mockData.findIndex(v => v.id === video.id));
+    const handleVideoPress = useCallback((item) => {
+        setSelectedVideo({
+            ...item,
+            videoUrl: "https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4"
+        });
     }, []);
 
     const handleClosePlayer = useCallback(() => {

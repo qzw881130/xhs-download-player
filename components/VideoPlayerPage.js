@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, StyleSheet, Dimensions, Image, TouchableOpacity, PanResponder, TouchableWithoutFeedback, Animated } from 'react-native';
+import { View, StyleSheet, Dimensions, Image, TouchableOpacity, PanResponder, TouchableWithoutFeedback, Animated, ActivityIndicator } from 'react-native';
 import { Appbar, IconButton, Text, Drawer, List, Button, Divider, SegmentedButtons, RadioButton, Switch } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -21,6 +21,8 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     const [autoPlay, setAutoPlay] = useState(true);
     const [isPlaying, setIsPlaying] = useState(false);
     const videoRef = useRef(null);
+    const [showCover, setShowCover] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         // Load saved settings when component mounts
@@ -118,14 +120,44 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
         });
     };
 
-    const handlePlayPress = async () => {
+    const videoUrl = "https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4";
+
+    useEffect(() => {
+        console.log('Video URL:', videoUrl);
+        // 尝试预加载视频
         if (videoRef.current) {
-            if (isPlaying) {
-                await videoRef.current.pauseAsync();
-            } else {
-                await videoRef.current.playAsync();
+            videoRef.current.loadAsync({ uri: videoUrl }, {}, false)
+                .then(() => console.log('Video preloaded successfully'))
+                .catch(error => console.error('Error preloading video:', error));
+        }
+    }, []);
+
+    const handlePlayPress = async () => {
+        console.log('Play button pressed');
+        if (videoRef.current) {
+            try {
+                const status = await videoRef.current.getStatusAsync();
+                console.log('Current video status:', status);
+
+                if (!status.isLoaded) {
+                    console.log('Video not loaded, attempting to load...');
+                    await videoRef.current.loadAsync({ uri: videoUrl }, {}, false);
+                }
+
+                if (isPlaying) {
+                    console.log('Pausing video');
+                    await videoRef.current.pauseAsync();
+                } else {
+                    console.log('Playing video');
+                    await videoRef.current.playAsync();
+                    setShowCover(false);
+                }
+                setIsPlaying(!isPlaying);
+            } catch (error) {
+                console.error('Error playing/pausing video:', error);
             }
-            setIsPlaying(!isPlaying);
+        } else {
+            console.log('Video ref is null');
         }
     };
 
@@ -141,26 +173,48 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
         console.log('Video changed:', video.title);
     }, [video]);
 
+    const onPlaybackStatusUpdate = (status) => {
+        console.log('Playback status:', status);
+        if (status.isLoaded) {
+            setIsLoading(false);
+            // 视频加载成功后的处理
+            if (status.didJustFinish) {
+                onVideoEnd();
+            }
+        } else {
+            // 视频加载失败的处理
+            console.error('Video failed to load:', status.error);
+            setIsLoading(false);
+        }
+    };
+
     return (
         <View style={styles.container} {...panResponder.panHandlers}>
             <StatusBar style="light" translucent backgroundColor="transparent" />
-            {video.videoUrl ? (
-                <Video
-                    ref={videoRef}
-                    source={{ uri: video.videoUrl }}
-                    style={styles.video}
-                    resizeMode="contain"
-                    isLooping={playMode === 'single'}
-                    onPlaybackStatusUpdate={(status) => {
-                        if (status.didJustFinish) {
-                            onVideoEnd();
-                        }
-                    }}
-                    rate={parseFloat(playSpeed)}
-                    shouldPlay={isPlaying}
-                />
-            ) : (
+            <Video
+                ref={videoRef}
+                source={{ uri: videoUrl }}
+                style={styles.video}
+                resizeMode="contain"
+                isLooping={playMode === 'single'}
+                onPlaybackStatusUpdate={onPlaybackStatusUpdate}
+                rate={parseFloat(playSpeed)}
+                shouldPlay={isPlaying}
+                useNativeControls={false}
+                onError={(error) => {
+                    console.error('Video playback error:', error);
+                    setIsLoading(false);
+                }}
+                onLoad={() => setIsLoading(false)}
+                onLoadStart={() => setIsLoading(true)}
+            />
+            {showCover && (
                 <Image source={{ uri: video.image }} style={styles.cover} />
+            )}
+            {isLoading && (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#FFFFFF" />
+                </View>
             )}
             <View style={styles.content}>
                 <IconButton
@@ -404,5 +458,11 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         width: width,
         height: height,
+    },
+    loadingContainer: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
 });
