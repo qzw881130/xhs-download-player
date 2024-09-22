@@ -16,6 +16,8 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     const slideAnim = useRef(new Animated.Value(300)).current; // Start from 300 (off-screen)
     const [playMode, setPlayMode] = useState('single');
     const [playOrder, setPlayOrder] = useState('order');
+    const [playSpeed, setPlaySpeed] = useState('1x');
+    const [autoPlay, setAutoPlay] = useState(true);
 
     useEffect(() => {
         // Load saved settings when component mounts
@@ -26,8 +28,12 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
         try {
             const savedPlayMode = await AsyncStorage.getItem('playMode');
             const savedPlayOrder = await AsyncStorage.getItem('playOrder');
+            const savedPlaySpeed = await AsyncStorage.getItem('playSpeed');
+            const savedAutoPlay = await AsyncStorage.getItem('autoPlay');
             if (savedPlayMode) setPlayMode(savedPlayMode);
             if (savedPlayOrder) setPlayOrder(savedPlayOrder);
+            if (savedPlaySpeed) setPlaySpeed(savedPlaySpeed);
+            if (savedAutoPlay !== null) setAutoPlay(JSON.parse(savedAutoPlay));
         } catch (error) {
             console.error('Error loading settings:', error);
         }
@@ -35,7 +41,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
 
     const saveSettings = async (key, value) => {
         try {
-            await AsyncStorage.setItem(key, value);
+            await AsyncStorage.setItem(key, typeof value === 'boolean' ? JSON.stringify(value) : value);
         } catch (error) {
             console.error('Error saving settings:', error);
         }
@@ -51,6 +57,18 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
         setPlayOrder(value);
         saveSettings('playOrder', value);
         console.log(`Play order changed to: ${value}`);
+    };
+
+    const handlePlaySpeedChange = (value) => {
+        setPlaySpeed(value);
+        saveSettings('playSpeed', value);
+        console.log(`Play speed changed to: ${value}`);
+    };
+
+    const handleAutoPlayChange = (value) => {
+        setAutoPlay(value);
+        saveSettings('autoPlay', value);
+        console.log(`Auto play changed to: ${value}`);
     };
 
     const panResponder = useRef(
@@ -158,13 +176,14 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                                     <View style={styles.settingControl}>
                                         <SegmentedButtons
                                             density="small"
+                                            value={playSpeed}
+                                            onValueChange={handlePlaySpeedChange}
                                             buttons={[
                                                 { label: '0.5x', value: '0.5x' },
                                                 { label: '1x', value: '1x' },
                                                 { label: '1.5x', value: '1.5x' },
                                                 { label: '2x', value: '2x' },
                                             ]}
-                                            onValueChange={(value) => console.log(`${value} pressed`)}
                                         />
                                     </View>
                                 </View>
@@ -226,7 +245,10 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                                 <View style={styles.settingRow}>
                                     <Text style={styles.settingLabel}>自动播放</Text>
                                     <View style={styles.settingControl}>
-                                        <Switch value={true} onValueChange={(value) => console.log(`Auto play ${value}`)} />
+                                        <Switch
+                                            value={autoPlay}
+                                            onValueChange={handleAutoPlayChange}
+                                        />
                                     </View>
                                 </View>
                             </Animated.View>
