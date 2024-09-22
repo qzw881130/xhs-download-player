@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, FlatList, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
-import { Appbar, Searchbar, Text, Card, Button } from 'react-native-paper';
+import { Appbar, Searchbar, Text, Card, Button, Menu } from 'react-native-paper';
 
 const { width } = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 24) / 2; // 24 is the total horizontal padding
@@ -8,6 +8,7 @@ const COLUMN_WIDTH = (width - 24) / 2; // 24 is the total horizontal padding
 export const VideoListPage = ({ title, count, data, onVideoPress }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [page, setPage] = useState(1);
+    const [menuVisible, setMenuVisible] = useState(false);
     const itemsPerPage = 10; // 假设每页显示10个项目
 
     const onChangeSearch = query => setSearchQuery(query);
@@ -24,6 +25,11 @@ export const VideoListPage = ({ title, count, data, onVideoPress }) => {
     );
 
     const totalPages = Math.ceil(data.length / itemsPerPage);
+
+    const openMenu = () => setMenuVisible(true);
+    const closeMenu = () => setMenuVisible(false);
+
+    const pageOptions = Array.from({ length: totalPages }, (_, i) => i + 1);
 
     return (
         <View style={styles.container}>
@@ -54,7 +60,26 @@ export const VideoListPage = ({ title, count, data, onVideoPress }) => {
                     >
                         上一页
                     </Button>
-                    <Text>{`第 ${page} 页，共 ${totalPages} 页`}</Text>
+                    <Menu
+                        visible={menuVisible}
+                        onDismiss={closeMenu}
+                        anchor={
+                            <Button onPress={openMenu}>
+                                {`第 ${page} 页`}
+                            </Button>
+                        }
+                    >
+                        {pageOptions.map((p) => (
+                            <Menu.Item
+                                key={p}
+                                onPress={() => {
+                                    setPage(p);
+                                    closeMenu();
+                                }}
+                                title={`第 ${p} 页`}
+                            />
+                        ))}
+                    </Menu>
                     <Button
                         onPress={() => setPage(p => Math.min(totalPages, p + 1))}
                         disabled={page === totalPages}
