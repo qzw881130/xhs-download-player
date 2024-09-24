@@ -120,7 +120,11 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
         });
     };
 
-    const videoUrl = "https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4";
+    // const videoUrl = "https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4";
+    // const videoUrl = "http://192.168.3.6:8722/xhs-videos/video_AB2F6-pgSdP_2S7jrfjn1t5CMazsX1pLkViBwzlQRJXzs=.mp4";
+    // const videoUrl = "https://sns-video-bd.xhscdn.com/stream/110/259/01e6d74aff1031460103730391b8ff8131_259.mp4";
+    // const videoUrl = "https://sns-video-bd.xhscdn.com/stream/110/259/01e6a123f21e0eb90103710390e57677aa_259.mp4 ";
+    const videoUrl = video.videoUrl;
 
     useEffect(() => {
         console.log('Video URL:', videoUrl);
