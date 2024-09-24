@@ -16,35 +16,27 @@ export const AccountPage = ({ navigation }) => {
     // const supabase = useSupabase();
     const { user, supabase } = useSupabase();
 
-    console.log('user==', JSON.stringify(user, null, 2))
+    // console.log('user==', JSON.stringify(user, null, 2))
 
     useEffect(() => {
         const loadUser = async () => {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            console.log(data)
-            if (error) {
-                console.error('Error fetching session:', error);
-            } else {
-                const user = session.user;
-                console.log('user==', user);
-                if (user) {
-                    setEmail(user.email);
-                    // Fetch stats from your backend or Supabase
-                    // Example:
-                    // const { data } = await supabase.from('videos').select('*');
-                    // setStats({
-                    //     totalVideos: data.length,
-                    //     likedVideos: data.filter(video => video.liked).length,
-                    //     favoritedVideos: data.filter(video => video.favorited).length,
-                    //     notedVideos: data.filter(video => video.noted).length,
-                    //     hiddenVideos: data.filter(video => video.hidden).length,
-                    // });
-                }
+            if (user) {
+                setEmail(user.email);
+                // Fetch stats from your backend or Supabase
+                // Example:
+                // const { data } = await supabase.from('videos').select('*');
+                // setStats({
+                //     totalVideos: data.length,
+                //     likedVideos: data.filter(video => video.liked).length,
+                //     favoritedVideos: data.filter(video => video.favorited).length,
+                //     notedVideos: data.filter(video => video.noted).length,
+                //     hiddenVideos: data.filter(video => video.hidden).length,
+                // });
             }
         };
 
         loadUser();
-    }, [supabase]);
+    }, []);
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
