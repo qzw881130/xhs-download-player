@@ -235,16 +235,17 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
             {isLoading && (
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#FFFFFF" />
+                    <IconButton
+                        icon={isPlaying ? "pause" : "play"}
+                        size={50}
+                        style={styles.playButton}
+                        onPress={handlePlayPress}
+                        color="white"
+                    />
                 </View>
             )}
             <View style={styles.content}>
-                <IconButton
-                    icon={isPlaying ? "pause" : "play"}
-                    size={50}
-                    style={styles.playButton}
-                    onPress={handlePlayPress}
-                    color="white"
-                />
+
                 <View style={styles.titleContainer}>
                     <Text style={styles.title}>{video.title}</Text>
                 </View>

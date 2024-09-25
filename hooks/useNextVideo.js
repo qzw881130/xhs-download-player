@@ -20,14 +20,19 @@ export const useNextVideo = () => {
                 .from('videos')
                 .select('*')
                 .eq('user_id', user.id)
-                .eq('is_hidden', false);
+                .eq('is_hidden', false)
+                .neq('id', video_id);
 
             if (is_random) {
-                // 随机选择一个不是当前视频的视频
-                query = query
-                    .neq('id', video_id)
-                    .order('RANDOM()')
-                    .limit(1);
+                // 获取所有符合条件的视频
+                const { data, error } = await query;
+                if (error) throw error;
+
+                // 在 JavaScript 中随机选择一个视频
+                if (data && data.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * data.length);
+                    return data[randomIndex];
+                }
             } else {
                 // 获取当前视频的创建时间
                 const { data: currentVideo } = await supabase
@@ -41,35 +46,29 @@ export const useNextVideo = () => {
                 }
 
                 // 获取下一个视频
-                query = query
+                const { data, error } = await query
                     .gt('created_at', currentVideo.created_at)
                     .order('created_at', { ascending: true })
                     .limit(1);
-            }
 
-            const { data, error } = await query;
+                if (error) throw error;
 
-            if (error) {
-                throw error;
-            }
+                if (data && data.length > 0) {
+                    return data[0];
+                } else {
+                    // 如果没有找到下一个视频，返回第一个视频
+                    const { data: firstVideo, error: firstVideoError } = await supabase
+                        .from('videos')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .eq('is_hidden', false)
+                        .order('created_at', { ascending: true })
+                        .limit(1);
 
-            if (data && data.length > 0) {
-                return data[0];
-            } else if (!is_random) {
-                // 如果没有找到下一个视频，返回第一个视频
-                const { data: firstVideo, error: firstVideoError } = await supabase
-                    .from('videos')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .eq('is_hidden', false)
-                    .order('created_at', { ascending: true })
-                    .limit(1);
+                    if (firstVideoError) throw firstVideoError;
 
-                if (firstVideoError) {
-                    throw firstVideoError;
+                    return firstVideo[0];
                 }
-
-                return firstVideo[0];
             }
 
             return null;
