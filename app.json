@@ -18,7 +18,8 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.qianzhiwei5921.XhsDownloadPlayer"
+      "bundleIdentifier": "com.qianzhiwei5921.XhsDownloadPlayer",
+      "buildNumber": "2"
     },
     "android": {
       "adaptiveIcon": {
