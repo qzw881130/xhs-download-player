@@ -67,10 +67,16 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
             onMoveShouldSetPanResponder: (evt, gestureState) => {
                 return Math.abs(gestureState.dy) > 10;
             },
-            onPanResponderRelease: (evt, gestureState) => {
+            onPanResponderRelease: async (evt, gestureState) => {
                 const now = Date.now();
                 if (gestureState.dy < -50 && now - lastSwipeTime > 500) {  // 向上滑动超过50个单位，且距离上次滑动超过500ms
                     console.log('Swiped up, fetching next video');
+                    setIsLoading(true);
+                    if (isPlaying) {
+                        await videoRef.current.pauseAsync();
+
+                    }
+
                     handleNextVideo();
                     setLastSwipeTime(now);
                 }
