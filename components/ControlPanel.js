@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, Button, SegmentedButtons, RadioButton, Switch } from 'react-native-paper';
+import { Text, Button, SegmentedButtons, RadioButton } from 'react-native-paper';
 
 export const ControlPanel = ({
     playSpeed,
@@ -129,22 +129,21 @@ const styles = StyleSheet.create({
         marginVertical: 10,
     },
     settingLabel: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#333',
         flex: 1,
     },
     settingControl: {
         flex: 2,
-        alignItems: 'flex-end',
     },
     radioButtonGroup: {
-        flexDirection: 'column',
-        alignItems: 'flex-start',
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
     },
     radioButtonRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 4,
+        marginLeft: 0,
     },
     radioButtonLabel: {
         marginLeft: 8,

@@ -206,44 +206,68 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
         }
     };
 
+    const togglePlayPause = async () => {
+        if (videoRef.current) {
+            try {
+                if (isPlaying) {
+                    await videoRef.current.pauseAsync();
+                } else {
+                    await videoRef.current.playAsync();
+                    setShowCover(false);
+                }
+                setIsPlaying(!isPlaying);
+            } catch (error) {
+                console.error('Error toggling play/pause:', error);
+            }
+        }
+    };
+
     return (
         <View style={styles.container} {...panResponder.panHandlers}>
             <StatusBar style="light" translucent backgroundColor="transparent" />
-            <Video
-                ref={videoRef}
-                source={videoUrl ? { uri: videoUrl } : undefined}
-                style={styles.video}
-                resizeMode="contain"
-                isLooping={playMode === 'single'}
-                onPlaybackStatusUpdate={onPlaybackStatusUpdate}
-                rate={parseFloat(playSpeed)}
-                shouldPlay={isPlaying}  // This will start playing automatically
-                useNativeControls={false}
-                onError={(error) => {
-                    console.error('Video playback error:', error);
-                    setIsLoading(false);
-                }}
-                onLoad={() => {
-                    setIsLoading(false);
-                    setShowCover(false);
-                }}
-                onLoadStart={() => setIsLoading(true)}
-            />
-            {showCover && (
-                <Image source={{ uri: video.image_src }} style={styles.cover} />
-            )}
-            {isLoading && (
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#FFFFFF" />
-                    <IconButton
-                        icon={isPlaying ? "pause" : "play"}
-                        size={50}
-                        style={styles.playButton}
-                        onPress={handlePlayPress}
-                        color="white"
+            <TouchableWithoutFeedback onPress={togglePlayPause}>
+                <View style={styles.videoContainer}>
+                    <Video
+                        ref={videoRef}
+                        source={videoUrl ? { uri: videoUrl } : undefined}
+                        style={styles.video}
+                        resizeMode="contain"
+                        isLooping={playMode === 'single'}
+                        onPlaybackStatusUpdate={onPlaybackStatusUpdate}
+                        rate={parseFloat(playSpeed)}
+                        shouldPlay={isPlaying}
+                        useNativeControls={false}
+                        onError={(error) => {
+                            console.error('Video playback error:', error);
+                            setIsLoading(false);
+                        }}
+                        onLoad={() => {
+                            setIsLoading(false);
+                            setShowCover(false);
+                        }}
+                        onLoadStart={() => setIsLoading(true)}
                     />
+                    {showCover && (
+                        <Image source={{ uri: video.image_src }} style={styles.cover} />
+                    )}
+                    {isLoading && (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color="#FFFFFF" />
+                        </View>
+                    )}
+                    {!isLoading && !isPlaying && (
+                        <View style={styles.playButtonContainer}>
+                            <IconButton
+                                icon="play"
+                                size={50}
+                                iconColor="white"
+                                style={styles.playButton}
+                                onPress={handlePlayPress}
+                            />
+                        </View>
+                    )}
                 </View>
-            )}
+            </TouchableWithoutFeedback>
             <View style={styles.content}>
 
                 <View style={styles.titleContainer}>
@@ -321,6 +345,8 @@ const styles = StyleSheet.create({
     },
     playButton: {
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     titleContainer: {
         position: 'absolute',
@@ -352,6 +378,19 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    videoContainer: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    playButtonContainer: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    playButton: {
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
 });
