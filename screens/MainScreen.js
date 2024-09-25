@@ -37,7 +37,7 @@ function MainScreen() {
     }, []);
 
     const handleNextVideo = (video) => {
-        console.log('next video', video)
+        // console.log('next video', video)
         setSelectedVideo(video);
     };
 

@@ -172,10 +172,19 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     };
 
     const handleNextVideo = async () => {
-        const nextVideo = await getNextVideo(video.id, playOrder === 'random');
-        console.log('nextVideo====', nextVideo)
-        if (nextVideo) {
-            onNextVideo(nextVideo);
+        try {
+            const playOrder = await AsyncStorage.getItem('playOrder');
+            const nextVideo = await getNextVideo(video.id, video.type, playOrder === 'random');
+            console.log('nextVideo====', nextVideo ? nextVideo.id : 'No next video found');
+            if (nextVideo) {
+                onNextVideo(nextVideo);
+            } else {
+                console.log('No next video available');
+                // 可以在这里添加一些用户反馈，比如显示一个提示消息
+            }
+        } catch (error) {
+            console.error('Error getting next video:', error);
+            // 可以在这里添加一些错误处理，比如显示一个错误消息
         }
     };
 
