@@ -17,7 +17,11 @@ export default function App() {
                 <NavigationContainer ref={navigationRef}>
                     <Stack.Navigator initialRouteName="LoginRegister">
                         <Stack.Screen name="LoginRegister" component={LoginRegisterScreen} />
-                        <Stack.Screen name="MyLikes" component={MainScreen} />
+                        <Stack.Screen
+                            name="MyLikes"
+                            component={MainScreen}
+                            options={{ headerShown: false }}
+                        />
                     </Stack.Navigator>
                 </NavigationContainer>
             </PaperProvider>

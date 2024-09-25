@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Text, Card, Button, ActivityIndicator } from 'react-native-paper';
+import { View, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import { Text, Card, Button, ActivityIndicator, Appbar } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSupabase } from '../contexts/SupabaseContext';
 import { useUserStats } from '../hooks/useUserStats';
@@ -19,10 +19,19 @@ export const AccountPage = ({ navigation }) => {
         navigation.navigate('LoginRegister');
     };
 
+    const renderAppBar = () => (
+        <Appbar.Header style={styles.appbar}>
+            <Appbar.Content title="帐号" style={styles.appbarContent} />
+        </Appbar.Header>
+    );
+
     if (loading) {
         return (
             <View style={styles.container}>
-                <ActivityIndicator size="large" />
+                {renderAppBar()}
+                <View style={styles.centerContent}>
+                    <ActivityIndicator size="large" />
+                </View>
             </View>
         );
     }
@@ -31,8 +40,11 @@ export const AccountPage = ({ navigation }) => {
         console.error('AccountPage: Error fetching stats:', error);
         return (
             <View style={styles.container}>
-                <Text>Error: {error}</Text>
-                <Button onPress={refetchStats}>Retry</Button>
+                {renderAppBar()}
+                <View style={styles.centerContent}>
+                    <Text>Error: {error}</Text>
+                    <Button onPress={refetchStats}>Retry</Button>
+                </View>
             </View>
         );
     }
@@ -41,8 +53,11 @@ export const AccountPage = ({ navigation }) => {
         console.log('AccountPage: No user found');
         return (
             <View style={styles.container}>
-                <Text>Please log in to view your account information.</Text>
-                <Button onPress={() => navigation.navigate('LoginRegister')}>Log In</Button>
+                {renderAppBar()}
+                <View style={styles.centerContent}>
+                    <Text>Please log in to view your account information.</Text>
+                    <Button onPress={() => navigation.navigate('LoginRegister')}>Log In</Button>
+                </View>
             </View>
         );
     }
@@ -51,50 +66,53 @@ export const AccountPage = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.accountSection}>
-                <Text style={styles.email}>{user.email}</Text>
-                <Button mode="contained" onPress={handleLogout} style={styles.button}>
-                    退出
-                </Button>
-            </View>
-            <View style={styles.statsSection}>
-                <Card style={styles.card}>
-                    <Card.Content style={styles.cardContent}>
-                        <Text style={styles.cardTitle}>帐户邮箱: </Text>
-                        <Text>{user.email}</Text>
-                    </Card.Content>
-                </Card>
-                <Card style={styles.card}>
-                    <Card.Content style={styles.cardContent}>
-                        <Text style={styles.cardTitle}>总视频数: </Text>
-                        <Text>{stats.totalVideos}</Text>
-                    </Card.Content>
-                </Card>
-                <Card style={styles.card}>
-                    <Card.Content style={styles.cardContent}>
-                        <Text style={styles.cardTitle}>点赞视频数: </Text>
-                        <Text>{stats.likedVideos}</Text>
-                    </Card.Content>
-                </Card>
-                <Card style={styles.card}>
-                    <Card.Content style={styles.cardContent}>
-                        <Text style={styles.cardTitle}>收藏视频数: </Text>
-                        <Text>{stats.favoritedVideos}</Text>
-                    </Card.Content>
-                </Card>
-                <Card style={styles.card}>
-                    <Card.Content style={styles.cardContent}>
-                        <Text style={styles.cardTitle}>笔记视频数: </Text>
-                        <Text>{stats.notedVideos}</Text>
-                    </Card.Content>
-                </Card>
-                <Card style={styles.card}>
-                    <Card.Content style={styles.cardContent}>
-                        <Text style={styles.cardTitle}>隐藏视频数: </Text>
-                        <Text>{stats.hiddenVideos}</Text>
-                    </Card.Content>
-                </Card>
-            </View>
+            {renderAppBar()}
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+                <View style={styles.accountSection}>
+                    <Text style={styles.email}>{user.email}</Text>
+                    <Button mode="contained" onPress={handleLogout} style={styles.button}>
+                        退出
+                    </Button>
+                </View>
+                <View style={styles.statsSection}>
+                    <Card style={styles.card}>
+                        <Card.Content style={styles.cardContent}>
+                            <Text style={styles.cardTitle}>帐户邮箱: </Text>
+                            <Text>{user.email}</Text>
+                        </Card.Content>
+                    </Card>
+                    <Card style={styles.card}>
+                        <Card.Content style={styles.cardContent}>
+                            <Text style={styles.cardTitle}>总视频数: </Text>
+                            <Text>{stats.totalVideos}</Text>
+                        </Card.Content>
+                    </Card>
+                    <Card style={styles.card}>
+                        <Card.Content style={styles.cardContent}>
+                            <Text style={styles.cardTitle}>点赞视频数: </Text>
+                            <Text>{stats.likedVideos}</Text>
+                        </Card.Content>
+                    </Card>
+                    <Card style={styles.card}>
+                        <Card.Content style={styles.cardContent}>
+                            <Text style={styles.cardTitle}>收藏视频数: </Text>
+                            <Text>{stats.favoritedVideos}</Text>
+                        </Card.Content>
+                    </Card>
+                    <Card style={styles.card}>
+                        <Card.Content style={styles.cardContent}>
+                            <Text style={styles.cardTitle}>笔记视频数: </Text>
+                            <Text>{stats.notedVideos}</Text>
+                        </Card.Content>
+                    </Card>
+                    <Card style={styles.card}>
+                        <Card.Content style={styles.cardContent}>
+                            <Text style={styles.cardTitle}>隐藏视频数: </Text>
+                            <Text>{stats.hiddenVideos}</Text>
+                        </Card.Content>
+                    </Card>
+                </View>
+            </ScrollView>
         </View>
     );
 };
@@ -102,6 +120,21 @@ export const AccountPage = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#f5f5f5',
+    },
+    appbar: {
+        elevation: 0,
+        backgroundColor: 'transparent',
+    },
+    appbarContent: {
+        alignItems: 'center',
+    },
+    centerContent: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    scrollContent: {
         padding: 16,
     },
     accountSection: {
