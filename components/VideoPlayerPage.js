@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { View, StyleSheet, Dimensions, Image, TouchableOpacity, PanResponder, TouchableWithoutFeedback, Animated, ActivityIndicator } from 'react-native';
-import { Appbar, IconButton, Text } from 'react-native-paper';
+import { Appbar, IconButton, Text, Snackbar } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -25,6 +25,20 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     const [playMode, setPlayMode] = useState('single');
     const [playOrder, setPlayOrder] = useState('order');
     const [playSpeed, setPlaySpeed] = useState('1x');
+
+    const [showTip, setShowTip] = useState(false);
+
+    useEffect(() => {
+        const checkFirstTime = async () => {
+            const hasSeenTip = await AsyncStorage.getItem('hasSeenSwipeUpTip');
+            if (hasSeenTip !== 'true') {
+                setShowTip(true);
+                await AsyncStorage.setItem('hasSeenSwipeUpTip', 'true');
+            }
+        };
+
+        checkFirstTime();
+    }, []);
 
     useEffect(() => {
         loadSettings();
@@ -292,6 +306,14 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                     </View>
                 </TouchableWithoutFeedback>
             )}
+            <Snackbar
+                visible={showTip}
+                onDismiss={() => setShowTip(false)}
+                duration={2000}
+                style={styles.snackbar}
+            >
+                上滑可观看下一个视频
+            </Snackbar>
         </View>
     );
 };
@@ -390,5 +412,16 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
+    },
+    snackbar: {
+        position: 'absolute',
+        bottom: 190,
+        color: 'red',
+        left: 0,
+        right: 0,
+        height: 70,
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
     },
 });
