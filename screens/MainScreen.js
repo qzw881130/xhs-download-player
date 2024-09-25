@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { BottomNavigation } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { VideoListPage } from '../components/VideoListPage';
@@ -9,7 +9,7 @@ import { AccountPage } from '../components/AccountPage';
 function MainScreen() {
     const [index, setIndex] = useState(0);
     const [routes] = useState([
-        { key: 'liked', title: '点赞', icon: 'heart' },
+        { key: 'liked', title: '点赞', icon: 'thumb-up' },
         { key: 'collected', title: '收藏', icon: 'star' },
         // { key: 'post', title: '笔记', icon: 'notebook' },
         // { key: 'about', title: '关于', icon: 'information' },
@@ -40,7 +40,7 @@ function MainScreen() {
     });
 
     const renderIcon = ({ route, focused, color }) => {
-        return <MaterialCommunityIcons name={route.icon} size={24} color={color} />;
+        return <MaterialCommunityIcons name={route.icon} size={22} color={color} />;
     };
 
     if (selectedVideo) {
@@ -54,11 +54,22 @@ function MainScreen() {
     return (
         <BottomNavigation
             navigationState={{ index, routes }}
+            labeled={true}
+            shifting={false}
             onIndexChange={setIndex}
             renderScene={renderScene}
             renderIcon={renderIcon}
+            barStyle={styles.barStyle}
+            style={styles.viewStyle}
         />
     );
 }
 
+const styles = StyleSheet.create({
+    barStyle: {
+        marginBottom: Platform.OS === 'ios' ? -35 : -10,
+    },
+    viewStyle: {
+    }
+});
 export default MainScreen;
