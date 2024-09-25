@@ -268,7 +268,9 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                 <View style={styles.titleContainer}>
                     <View style={styles.badgeContainer}>
                         <Text style={styles.badgeText}>ID: {video.id}</Text>
-                        <Text style={[styles.badgeText, { marginLeft: 8 }]}>{playSpeed}</Text>
+                        <Text style={[styles.badgeText, { marginLeft: 8 }]}>{`倍速 ` + playSpeed}</Text>
+                        <Text style={[styles.badgeText, { marginLeft: 8 }]}>{playOrder == 'random' ? '随机播放' : '顺序播放'}</Text>
+                        <Text style={[styles.badgeText, { marginLeft: 8 }]}>{playMode == 'single' ? '单循环' : '自动播放一下'}</Text>
                     </View>
                     <Text style={styles.title}>{video.title}</Text>
                 </View>
