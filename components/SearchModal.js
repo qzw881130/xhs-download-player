@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, FlatList, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, FlatList, TouchableOpacity, Dimensions, Keyboard } from 'react-native';
 import { Modal, Portal, Searchbar, IconButton, Text, Card, Button, Menu, ActivityIndicator } from 'react-native-paper';
 import { useFilteredVideoList } from '../hooks/useFilteredVideoList';
 
@@ -32,6 +32,11 @@ const SearchModal = ({ visible, onDismiss, onVideoPress, type }) => {
         // search(query);
     };
 
+    const handleSearch = () => {
+        search(searchQuery);
+        Keyboard.dismiss(); // 隐藏键盘
+    };
+
     const renderItem = ({ item }) => (
         <TouchableOpacity onPress={() => onVideoPress(item)}>
             <Card style={styles.card}>
@@ -62,14 +67,15 @@ const SearchModal = ({ visible, onDismiss, onVideoPress, type }) => {
                         style={styles.backIcon}
                     />
                     <Searchbar
-                        placeholder="搜索"
+                        placeholder=""
                         onChangeText={onChangeSearch}
                         value={searchQuery}
                         style={styles.searchbar}
                         inputStyle={styles.searchbarInput}
                         contentStyle={styles.searchbarContent}
+                        onSubmitEditing={handleSearch}
                     />
-                    <Button onPress={() => search(searchQuery)}>Search</Button>
+                    <Button onPress={handleSearch}>搜索</Button>
                 </View>
                 <Text style={styles.resultCount}>共找到 {count} 个结果</Text>
                 <FlatList
