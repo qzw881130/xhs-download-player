@@ -17,7 +17,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.qianzhiwei5921.XhsDownloadPlayer"
     },
     "android": {
       "adaptiveIcon": {
@@ -30,7 +31,10 @@
     },
     "extra": {
       "supabaseUrl": "@env:SUPABASE_URL",
-      "supabaseAnonKey": "@env:SUPABASE_ANON_KEY"
+      "supabaseAnonKey": "@env:SUPABASE_ANON_KEY",
+      "eas": {
+        "projectId": "346240cd-c217-47e4-aa08-b1976a9a4279"
+      }
     }
   }
 }
