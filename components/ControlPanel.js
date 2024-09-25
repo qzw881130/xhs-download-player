@@ -9,8 +9,6 @@ export const ControlPanel = ({
     handlePlayModeChange,
     playOrder,
     handlePlayOrderChange,
-    autoPlay,
-    handleAutoPlayChange,
     closeSettings
 }) => {
     return (
@@ -89,16 +87,6 @@ export const ControlPanel = ({
                             </TouchableOpacity>
                         </View>
                     </RadioButton.Group>
-                </View>
-            </View>
-
-            <View style={styles.settingRow}>
-                <Text style={styles.settingLabel}>自动播放</Text>
-                <View style={styles.settingControl}>
-                    <Switch
-                        value={autoPlay}
-                        onValueChange={handleAutoPlayChange}
-                    />
                 </View>
             </View>
         </View>

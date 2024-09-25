@@ -19,7 +19,6 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     const [playMode, setPlayMode] = useState('single');
     const [playOrder, setPlayOrder] = useState('order');
     const [playSpeed, setPlaySpeed] = useState('1x');
-    const [autoPlay, setAutoPlay] = useState(true);
     const [isPlaying, setIsPlaying] = useState(false);
     const videoRef = useRef(null);
     const [showCover, setShowCover] = useState(true);
@@ -35,11 +34,9 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
             const savedPlayMode = await AsyncStorage.getItem('playMode');
             const savedPlayOrder = await AsyncStorage.getItem('playOrder');
             const savedPlaySpeed = await AsyncStorage.getItem('playSpeed');
-            const savedAutoPlay = await AsyncStorage.getItem('autoPlay');
             if (savedPlayMode) setPlayMode(savedPlayMode);
             if (savedPlayOrder) setPlayOrder(savedPlayOrder);
             if (savedPlaySpeed) setPlaySpeed(savedPlaySpeed);
-            if (savedAutoPlay !== null) setAutoPlay(JSON.parse(savedAutoPlay));
         } catch (error) {
             console.error('Error loading settings:', error);
         }
@@ -69,12 +66,6 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
         setPlaySpeed(value);
         saveSettings('playSpeed', value);
         console.log(`Play speed changed to: ${value}`);
-    };
-
-    const handleAutoPlayChange = (value) => {
-        setAutoPlay(value);
-        saveSettings('autoPlay', value);
-        console.log(`Auto play changed to: ${value}`);
     };
 
     const panResponder = useRef(
@@ -260,8 +251,6 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                                     handlePlayModeChange={handlePlayModeChange}
                                     playOrder={playOrder}
                                     handlePlayOrderChange={handlePlayOrderChange}
-                                    autoPlay={autoPlay}
-                                    handleAutoPlayChange={handleAutoPlayChange}
                                     closeSettings={closeSettings}
                                 />
                             </Animated.View>
