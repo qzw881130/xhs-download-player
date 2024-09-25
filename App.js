@@ -16,7 +16,20 @@ export default function App() {
             <PaperProvider>
                 <NavigationContainer ref={navigationRef}>
                     <Stack.Navigator initialRouteName="LoginRegister">
-                        <Stack.Screen name="LoginRegister" component={LoginRegisterScreen} />
+                        <Stack.Screen
+                            name="LoginRegister"
+                            component={LoginRegisterScreen}
+                            options={{
+                                title: '小红书播放器',
+                                headerStyle: {
+                                    backgroundColor: '#63519f',
+                                },
+                                headerTintColor: '#fff',
+                                headerTitleStyle: {
+                                    fontWeight: 'bold',
+                                },
+                            }}
+                        />
                         <Stack.Screen
                             name="MyLikes"
                             component={MainScreen}
