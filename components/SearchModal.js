@@ -66,8 +66,10 @@ const SearchModal = ({ visible, onDismiss, onVideoPress, type }) => {
                         onChangeText={onChangeSearch}
                         value={searchQuery}
                         style={styles.searchbar}
-                        onSubmitEditing={() => search(searchQuery)}
+                        inputStyle={styles.searchbarInput}
+                        contentStyle={styles.searchbarContent}
                     />
+                    <Button onPress={() => search(searchQuery)}>Search</Button>
                 </View>
                 <Text style={styles.resultCount}>共找到 {count} 个结果</Text>
                 <FlatList
@@ -148,6 +150,16 @@ const styles = StyleSheet.create({
     },
     searchbar: {
         flex: 1,
+        height: 40,
+        justifyContent: 'center',
+    },
+    searchbarInput: {
+        fontSize: 16,
+        paddingVertical: 0,
+        textAlignVertical: 'center',
+    },
+    searchbarContent: {
+        justifyContent: 'center', // 添加这行确保文本居中
     },
     resultCount: {
         paddingHorizontal: 16,
