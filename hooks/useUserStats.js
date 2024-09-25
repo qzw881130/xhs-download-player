@@ -30,7 +30,10 @@ export const useUserStats = () => {
             const { data: totalVideos, error: totalError } = await supabase
                 .from(table)
                 .select('id', { count: 'exact' })
-                .eq('user_id', user.id);
+                .eq('user_id', user.id)
+                .not('video_src', 'is', null)  // 确保 video_src 不为 null
+                .not('video_src', 'eq', '')    // 确保 video_src 不为空字符串
+                ;
 
             if (totalError) {
                 console.error('Error fetching total videos:', totalError);
@@ -42,7 +45,10 @@ export const useUserStats = () => {
                 .select('id', { count: 'exact' })
                 .eq('user_id', user.id)
                 .eq('type', 'liked')
-                .eq('is_hidden', false);
+                .eq('is_hidden', false)
+                .not('video_src', 'is', null)  // 确保 video_src 不为 null
+                .not('video_src', 'eq', '')    // 确保 video_src 不为空字符串
+                ;
 
             if (likedError) {
                 console.error('Error fetching liked videos:', likedError);
@@ -54,7 +60,10 @@ export const useUserStats = () => {
                 .select('id', { count: 'exact' })
                 .eq('user_id', user.id)
                 .eq('type', 'collected')
-                .eq('is_hidden', false);
+                .eq('is_hidden', false)
+                .not('video_src', 'is', null)  // 确保 video_src 不为 null
+                .not('video_src', 'eq', '')    // 确保 video_src 不为空字符串
+                ;
 
             if (favoritedError) {
                 console.error('Error fetching favorited videos:', favoritedError);
@@ -66,7 +75,10 @@ export const useUserStats = () => {
                 .select('id', { count: 'exact' })
                 .eq('user_id', user.id)
                 .eq('type', 'post')
-                .eq('is_hidden', false);
+                .eq('is_hidden', false)
+                .not('video_src', 'is', null)  // 确保 video_src 不为 null
+                .not('video_src', 'eq', '')    // 确保 video_src 不为空字符串
+                ;
 
             if (notedError) {
                 console.error('Error fetching noted videos:', notedError);
@@ -77,7 +89,10 @@ export const useUserStats = () => {
                 .from(table)
                 .select('id', { count: 'exact' })
                 .eq('user_id', user.id)
-                .eq('is_hidden', true);
+                .eq('is_hidden', true)
+                .not('video_src', 'is', null)  // 确保 video_src 不为 null
+                .not('video_src', 'eq', '')    // 确保 video_src 不为空字符串
+                ;
 
             if (hiddenError) {
                 console.error('Error fetching hidden videos:', hiddenError);

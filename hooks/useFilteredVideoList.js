@@ -31,6 +31,8 @@ export const useFilteredVideoList = ({ type, initialPage = 1, pageSize = 10 }) =
                 .eq('user_id', user.id)
                 .eq('is_hidden', false)
                 .eq('type', type)
+                .not('video_src', 'is', null)  // 确保 video_src 不为 null
+                .not('video_src', 'eq', '')    // 确保 video_src 不为空字符串
                 .order('created_at', { ascending: false });
 
             if (keyword) {
