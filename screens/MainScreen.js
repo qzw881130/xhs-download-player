@@ -27,10 +27,7 @@ function MainScreen() {
     const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
 
     const handleVideoPress = useCallback((item) => {
-        setSelectedVideo({
-            ...item,
-            videoUrl: "https://sns-video-bd.xhscdn.com/stream/110/259/01e6bda08a9c4f06010370039154bd2c17_259.mp4"
-        });
+        setSelectedVideo(item);
     }, []);
 
     const handleClosePlayer = useCallback(() => {
@@ -49,9 +46,9 @@ function MainScreen() {
     }, [selectedVideoIndex]);
 
     const renderScene = BottomNavigation.SceneMap({
-        liked: () => <VideoListPage title="我的点赞视频" type='liked' count={mockData.length} data={mockData} onVideoPress={handleVideoPress} />,
-        collected: () => <VideoListPage title="我的收藏视频" type='collected' count={mockData.length} data={mockData} onVideoPress={handleVideoPress} />,
-        post: () => <VideoListPage title="我的笔记视频" type='post' count={mockData.length} data={mockData} onVideoPress={handleVideoPress} />,
+        liked: () => <VideoListPage title="我的点赞视频" type='liked' onVideoPress={handleVideoPress} />,
+        collected: () => <VideoListPage title="我的收藏视频" type='collected' onVideoPress={handleVideoPress} />,
+        post: () => <VideoListPage title="我的笔记视频" type='post' onVideoPress={handleVideoPress} />,
         // about: () => <VideoListPage title="关于" count={0} data={[]} onVideoPress={handleVideoPress} />,
         account: () => <AccountPage />
     });
