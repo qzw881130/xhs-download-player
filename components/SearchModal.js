@@ -156,13 +156,15 @@ const styles = StyleSheet.create({
     },
     searchbar: {
         flex: 1,
-        height: 40,
         justifyContent: 'center',
+        height: 40,
     },
     searchbarInput: {
         fontSize: 16,
         paddingVertical: 0,
+        // backgroundColor: 'red',
         textAlignVertical: 'center',
+        marginTop: -5
     },
     searchbarContent: {
         justifyContent: 'center', // 添加这行确保文本居中
