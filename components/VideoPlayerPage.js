@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Video } from 'expo-av';
 import { ControlPanel } from './ControlPanel';
+import { useNextVideo } from '../hooks/useNextVideo';
 
 const { width, height } = Dimensions.get('window');
 
@@ -23,6 +24,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     const videoRef = useRef(null);
     const [showCover, setShowCover] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
+    const { getNextVideo, loading: loadingNextVideo } = useNextVideo();
 
     useEffect(() => {
         // Load saved settings when component mounts
@@ -77,7 +79,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                 const now = Date.now();
                 if (gestureState.dy < -50 && now - lastSwipeTime > 500) {  // 向上滑动超过50个单位，且距离上次滑动超过500ms
                     console.log('Swiped up, fetching next video');
-                    onNextVideo();
+                    handleNextVideo();
                     setLastSwipeTime(now);
                 }
             },
@@ -166,11 +168,19 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
         }
     };
 
+    const handleNextVideo = async () => {
+        const nextVideo = await getNextVideo(video.id, playOrder === 'random');
+        console.log('nextVideo====', nextVideo)
+        if (nextVideo) {
+            onNextVideo(nextVideo);
+        }
+    };
+
     const onVideoEnd = async () => {
         if (playMode === 'single') {
             await videoRef.current.replayAsync();
         } else if (playMode === 'auto') {
-            onNextVideo();
+            handleNextVideo();
         }
     };
 

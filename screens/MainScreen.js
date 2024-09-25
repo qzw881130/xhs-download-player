@@ -36,14 +36,10 @@ function MainScreen() {
         setSelectedVideoIndex(0);
     }, []);
 
-    const handleNextVideo = useCallback(() => {
-        const nextIndex = (selectedVideoIndex + 1) % mockData.length;
-        console.log('selectedVideoIndex:', selectedVideoIndex, 'nextIndex:', nextIndex);
-        const nextVideo = mockData[nextIndex];
-        setSelectedVideoIndex(nextIndex);
-        setSelectedVideo(nextVideo);
-        console.log('Fetching next video:', nextVideo.title);
-    }, [selectedVideoIndex]);
+    const handleNextVideo = (video) => {
+        console.log('next video', video)
+        setSelectedVideo(video);
+    };
 
     const renderScene = BottomNavigation.SceneMap({
         liked: () => <VideoListPage title="我的点赞视频" type='liked' onVideoPress={handleVideoPress} />,
