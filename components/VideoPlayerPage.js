@@ -20,7 +20,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     const [playMode, setPlayMode] = useState('single');
     const [playOrder, setPlayOrder] = useState('order');
     const [playSpeed, setPlaySpeed] = useState('1x');
-    const [isPlaying, setIsPlaying] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(true);  // Set initial state to true
     const videoRef = useRef(null);
     const [showCover, setShowCover] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
@@ -114,7 +114,6 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
         });
     };
 
-    // const videoUrl = "https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4";
     const videoUrl = video.video_src;
 
     useEffect(() => {
@@ -126,7 +125,11 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
         // 尝试预加载视频
         if (videoRef.current) {
             videoRef.current.loadAsync({ uri: videoUrl }, {}, false)
-                .then(() => console.log('Video preloaded successfully'))
+                .then(() => {
+                    console.log('Video preloaded successfully');
+                    setShowCover(false);  // Hide cover when video is loaded
+                    videoRef.current.playAsync();  // Start playing the video
+                })
                 .catch(error => console.error('Error preloading video:', error));
         }
     }, [videoUrl]);
@@ -214,14 +217,16 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                 isLooping={playMode === 'single'}
                 onPlaybackStatusUpdate={onPlaybackStatusUpdate}
                 rate={parseFloat(playSpeed)}
-                shouldPlay={isPlaying}
+                shouldPlay={isPlaying}  // This will start playing automatically
                 useNativeControls={false}
                 onError={(error) => {
                     console.error('Video playback error:', error);
                     setIsLoading(false);
-                    // 可以在这里添加一个用户提示，比如显示一个错误消息
                 }}
-                onLoad={() => setIsLoading(false)}
+                onLoad={() => {
+                    setIsLoading(false);
+                    setShowCover(false);
+                }}
                 onLoadStart={() => setIsLoading(true)}
             />
             {showCover && (

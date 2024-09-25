@@ -6,8 +6,8 @@ import { Text, TextInput, Button, ActivityIndicator, Checkbox } from 'react-nati
 import { useSupabase } from '../contexts/SupabaseContext';
 
 export default function LoginRegisterScreen() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('qianzhiwei5921@gmail.com');
+    const [password, setPassword] = useState('881130');
     const [loading, setLoading] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const navigation = useNavigation();
