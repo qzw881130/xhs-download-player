@@ -4,19 +4,28 @@ import { Text, Card, Button, ActivityIndicator, Appbar } from 'react-native-pape
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSupabase } from '../contexts/SupabaseContext';
 import { useUserStats } from '../hooks/useUserStats';
+import { useNavigation } from '@react-navigation/native';
 
-export const AccountPage = ({ navigation }) => {
+export const AccountPage = () => {
     const { user, supabase } = useSupabase();
     const { stats, loading, error, refetchStats } = useUserStats();
+    const navigation = useNavigation();
 
     useEffect(() => {
         console.log('AccountPage: Current user:', user);
     }, [user]);
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
-        await AsyncStorage.clear();
-        navigation.navigate('LoginRegister');
+        try {
+            await supabase.auth.signOut();
+            await AsyncStorage.clear();
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'LoginRegister' }],
+            });
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
     };
 
     const renderAppBar = () => (
@@ -53,19 +62,6 @@ export const AccountPage = ({ navigation }) => {
         );
     }
 
-    if (!user) {
-        console.log('AccountPage: No user found');
-        return (
-            <View style={styles.container}>
-                {renderAppBar()}
-                <View style={styles.centerContent}>
-                    <Text>Please log in to view your account information.</Text>
-                    <Button onPress={() => navigation.navigate('LoginRegister')}>Log In</Button>
-                </View>
-            </View>
-        );
-    }
-
     console.log('AccountPage: Rendering stats:', stats);
 
     return (
@@ -73,7 +69,7 @@ export const AccountPage = ({ navigation }) => {
             {renderAppBar()}
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.accountSection}>
-                    <Text style={styles.email}>{user.email}</Text>
+                    <Text style={styles.email}>{user?.email}</Text>
                     <Button mode="contained" onPress={handleLogout} style={styles.button}>
                         退出
                     </Button>
