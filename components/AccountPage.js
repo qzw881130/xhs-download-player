@@ -21,7 +21,11 @@ export const AccountPage = ({ navigation }) => {
 
     const renderAppBar = () => (
         <Appbar.Header style={styles.appbar}>
-            <Appbar.Content title="帐号" style={styles.appbarContent} />
+            <Appbar.Content
+                title="帐号"
+                titleStyle={styles.appbarTitle}
+                style={styles.appbarContent}
+            />
         </Appbar.Header>
     );
 
@@ -105,6 +109,11 @@ const styles = StyleSheet.create({
     appbarContent: {
         alignItems: 'center',
     },
+    appbarTitle: {
+        color: '#000000', // 更深的颜色，可以根据需要调整
+        fontWeight: 'bold', // 加粗字体
+        fontSize: 26, // 增大字体大小
+    },
     centerContent: {
         flex: 1,
         justifyContent: 'center',
@@ -120,6 +129,8 @@ const styles = StyleSheet.create({
     email: {
         fontSize: 18,
         marginBottom: 8,
+        color: '#333', // 更深的颜色
+        fontWeight: '600', // 稍微加粗
     },
     button: {
         marginTop: 8,

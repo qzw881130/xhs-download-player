@@ -14,6 +14,8 @@ yarn run push-env
 yarn run package-ios
 ```
 
+
+## Make icon/favicon
 ```
 mv Cjdowner-Cryptocurrency-Flat-Canada-eCoin-CDN.1024.png icon-red-leaf.png
 magick bc3b84d22bb3fc69f9ad235b8bdfe50d.jpg -resize "1284\!x2778\!" splash_car.png

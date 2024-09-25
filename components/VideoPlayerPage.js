@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'flex-end',  // 将内容移到底部
         padding: 0,
-        bottom: 60
+        bottom: 70
     },
     headerGradient: {
         position: 'absolute',
