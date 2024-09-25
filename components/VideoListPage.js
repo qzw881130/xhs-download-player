@@ -57,8 +57,11 @@ export const VideoListPage = ({ title, type, data, onVideoPress }) => {
     if (loading) {
         return (
             <View style={styles.container}>
+                <Appbar.Header>
+                    <Appbar.Content title={title} />
+                    <Appbar.Action icon="magnify" onPress={() => setSearchVisible(true)} />
+                </Appbar.Header>
                 <ActivityIndicator animating={true} size="large" />
-                <Text>加载中...</Text>
             </View>
         );
     }
@@ -66,7 +69,7 @@ export const VideoListPage = ({ title, type, data, onVideoPress }) => {
     return (
         <View style={styles.container}>
             <Appbar.Header>
-                <Appbar.Content title={title} subtitle={count > 0 ? `共${count}个` : undefined} />
+                <Appbar.Content title={title + `（共${count}个)`} />
                 <Appbar.Action icon="magnify" onPress={() => setSearchVisible(true)} />
             </Appbar.Header>
             <FlatList
