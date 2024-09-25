@@ -162,7 +162,6 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     };
 
     const onVideoEnd = async () => {
-        const playMode = await AsyncStorage.getItem('playMode') || 'single';
         if (playMode === 'single') {
             await videoRef.current.replayAsync();
         } else if (playMode === 'auto') {
@@ -255,6 +254,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                 <View style={styles.titleContainer}>
                     <View style={styles.badgeContainer}>
                         <Text style={styles.badgeText}>ID: {video.id}</Text>
+                        <Text style={[styles.badgeText, { marginLeft: 8 }]}>{playSpeed}</Text>
                     </View>
                     <Text style={styles.title}>{video.title}</Text>
                 </View>
@@ -335,16 +335,17 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     badgeContainer: {
-        backgroundColor: 'rgba(255,255,255,0.2)',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 4,
         alignSelf: 'flex-start',
         marginBottom: 8,
+        flexDirection: 'row',
     },
     badgeText: {
         color: 'white',
         fontSize: 12,
+        borderRadius: 4,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
     },
     title: {
         color: 'white',
