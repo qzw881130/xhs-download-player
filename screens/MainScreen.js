@@ -20,7 +20,7 @@ function MainScreen() {
         { key: 'liked', title: '点赞', icon: 'heart' },
         { key: 'collected', title: '收藏', icon: 'star' },
         { key: 'post', title: '笔记', icon: 'notebook' },
-        { key: 'about', title: '关于', icon: 'information' },
+        // { key: 'about', title: '关于', icon: 'information' },
         { key: 'account', title: '帐号', icon: 'account' },
     ]);
     const [selectedVideo, setSelectedVideo] = useState(null);
@@ -49,10 +49,10 @@ function MainScreen() {
     }, [selectedVideoIndex]);
 
     const renderScene = BottomNavigation.SceneMap({
-        liked: () => <VideoListPage title="我的点赞视频" count={mockData.length} data={mockData} onVideoPress={handleVideoPress} />,
-        collected: () => <VideoListPage title="我的收藏视频" count={mockData.length} data={mockData} onVideoPress={handleVideoPress} />,
-        post: () => <VideoListPage title="我的笔记视频" count={mockData.length} data={mockData} onVideoPress={handleVideoPress} />,
-        about: () => <VideoListPage title="关于" count={0} data={[]} onVideoPress={handleVideoPress} />,
+        liked: () => <VideoListPage title="我的点赞视频" type='liked' count={mockData.length} data={mockData} onVideoPress={handleVideoPress} />,
+        collected: () => <VideoListPage title="我的收藏视频" type='collected' count={mockData.length} data={mockData} onVideoPress={handleVideoPress} />,
+        post: () => <VideoListPage title="我的笔记视频" type='post' count={mockData.length} data={mockData} onVideoPress={handleVideoPress} />,
+        // about: () => <VideoListPage title="关于" count={0} data={[]} onVideoPress={handleVideoPress} />,
         account: () => <AccountPage />
     });
 
