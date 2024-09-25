@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     settingControl: {
-        flex: 2,
+        flex: 4,
     },
     radioButtonGroup: {
         flexDirection: 'row',

@@ -294,6 +294,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                         <TouchableWithoutFeedback>
                             <Animated.View
                                 style={[
+                                    styles.controlPanelContainer,
                                     {
                                         transform: [{ translateY: slideAnim }],
                                     },
@@ -404,5 +405,11 @@ const styles = StyleSheet.create({
     },
     playButton: {
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    controlPanelContainer: {
+        maxHeight: '80%',  // 限制最大高度
+        backgroundColor: 'white',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
     },
 });
