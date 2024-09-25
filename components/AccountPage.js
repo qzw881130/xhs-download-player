@@ -1,48 +1,53 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Appbar, Text, Card, Button } from 'react-native-paper';
+import { Text, Card, Button, ActivityIndicator } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSupabase } from '../contexts/SupabaseContext';
+import { useUserStats } from '../hooks/useUserStats';
 
 export const AccountPage = ({ navigation }) => {
-    const [email, setEmail] = useState('');
-    const [stats, setStats] = useState({
-        totalVideos: 0,
-        likedVideos: 0,
-        favoritedVideos: 0,
-        notedVideos: 0,
-        hiddenVideos: 0,
-    });
-    // const supabase = useSupabase();
     const { user, supabase } = useSupabase();
-
-    // console.log('user==', JSON.stringify(user, null, 2))
+    const { stats, loading, error, refetchStats } = useUserStats();
 
     useEffect(() => {
-        const loadUser = async () => {
-            if (user) {
-                setEmail(user.email);
-                // Fetch stats from your backend or Supabase
-                // Example:
-                // const { data } = await supabase.from('videos').select('*');
-                // setStats({
-                //     totalVideos: data.length,
-                //     likedVideos: data.filter(video => video.liked).length,
-                //     favoritedVideos: data.filter(video => video.favorited).length,
-                //     notedVideos: data.filter(video => video.noted).length,
-                //     hiddenVideos: data.filter(video => video.hidden).length,
-                // });
-            }
-        };
-
-        loadUser();
-    }, []);
+        console.log('AccountPage: Current user:', user);
+    }, [user]);
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
         await AsyncStorage.clear();
         navigation.navigate('LoginRegister');
     };
+
+    if (loading) {
+        return (
+            <View style={styles.container}>
+                <ActivityIndicator size="large" />
+            </View>
+        );
+    }
+
+    if (error) {
+        console.error('AccountPage: Error fetching stats:', error);
+        return (
+            <View style={styles.container}>
+                <Text>Error: {error}</Text>
+                <Button onPress={refetchStats}>Retry</Button>
+            </View>
+        );
+    }
+
+    if (!user) {
+        console.log('AccountPage: No user found');
+        return (
+            <View style={styles.container}>
+                <Text>Please log in to view your account information.</Text>
+                <Button onPress={() => navigation.navigate('LoginRegister')}>Log In</Button>
+            </View>
+        );
+    }
+
+    console.log('AccountPage: Rendering stats:', stats);
 
     return (
         <View style={styles.container}>
@@ -56,7 +61,7 @@ export const AccountPage = ({ navigation }) => {
                 <Card style={styles.card}>
                     <Card.Content style={styles.cardContent}>
                         <Text style={styles.cardTitle}>帐户邮箱: </Text>
-                        <Text>{email}</Text>
+                        <Text>{user.email}</Text>
                     </Card.Content>
                 </Card>
                 <Card style={styles.card}>
