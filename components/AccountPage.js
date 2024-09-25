@@ -77,12 +77,6 @@ export const AccountPage = ({ navigation }) => {
                 <View style={styles.statsSection}>
                     <Card style={styles.card}>
                         <Card.Content style={styles.cardContent}>
-                            <Text style={styles.cardTitle}>帐户邮箱: </Text>
-                            <Text>{user.email}</Text>
-                        </Card.Content>
-                    </Card>
-                    <Card style={styles.card}>
-                        <Card.Content style={styles.cardContent}>
                             <Text style={styles.cardTitle}>点赞视频数: </Text>
                             <Text>{stats.likedVideos}</Text>
                         </Card.Content>
