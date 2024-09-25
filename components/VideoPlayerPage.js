@@ -112,6 +112,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
         console.log('Video URL:', videoUrl);
         if (!videoUrl) {
             console.error('Invalid video URL');
+            handleNextVideo()
             return;
         }
         // 尝试预加载视频
