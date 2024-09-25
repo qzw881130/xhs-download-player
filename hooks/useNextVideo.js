@@ -24,14 +24,20 @@ export const useNextVideo = () => {
                 .neq('id', video_id);
 
             if (is_random) {
-                // 获取所有符合条件的视频
-                const { data, error } = await query;
+                // 获取符合条件的记录总数
+                const { count, error: countError } = await query.select('id', { count: 'exact', head: true });
+                if (countError) throw countError;
+
+                // 生成一个随机偏移量
+                const randomOffset = Math.floor(Math.random() * count);
+
+                console.log('is_random=====', is_random, 'randomOffset===', randomOffset)
+                // 使用 limit 和 offset 取出一条记录
+                const { data, error } = await query.limit(1).offset(randomOffset);
                 if (error) throw error;
 
-                // 在 JavaScript 中随机选择一个视频
                 if (data && data.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * data.length);
-                    return data[randomIndex];
+                    return data[0];
                 }
             } else {
                 // 获取当前视频的创建时间

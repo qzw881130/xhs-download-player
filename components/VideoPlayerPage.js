@@ -269,8 +269,10 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                 </View>
             </TouchableWithoutFeedback>
             <View style={styles.content}>
-
                 <View style={styles.titleContainer}>
+                    <View style={styles.badgeContainer}>
+                        <Text style={styles.badgeText}>ID: {video.id}</Text>
+                    </View>
                     <Text style={styles.title}>{video.title}</Text>
                 </View>
             </View>
@@ -328,8 +330,8 @@ const styles = StyleSheet.create({
     },
     content: {
         ...StyleSheet.absoluteFillObject,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: 'flex-end',  // 将内容移到底部
+        padding: 16,
     },
     headerGradient: {
         position: 'absolute',
@@ -349,16 +351,26 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     titleContainer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        padding: 16,
         backgroundColor: 'rgba(0,0,0,0.5)',
+        padding: 16,
+        borderRadius: 8,
+    },
+    badgeContainer: {
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 4,
+        alignSelf: 'flex-start',
+        marginBottom: 8,
+    },
+    badgeText: {
+        color: 'white',
+        fontSize: 12,
     },
     title: {
         color: 'white',
         fontSize: 18,
+        fontWeight: 'bold',
     },
     overlay: {
         position: 'absolute',
