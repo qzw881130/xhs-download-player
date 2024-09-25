@@ -18,17 +18,16 @@ export const useNextVideo = () => {
         try {
             console.log(`Fetching next video. Current video ID: ${video_id}, Is random: ${is_random}`);
 
-            let query = supabase
-                .from('videos')
-                .select('*')
-                .eq('user_id', user.id)
-                .eq('is_hidden', false)
-                .eq('type', type)
-                .neq('id', video_id);
-
             if (!!is_random) {
                 // 获取符合条件的记录总数
-                const { count: totalCount, error: countError } = await query.select('*', { count: 'exact', head: true });
+                const { count: totalCount, error: countError } = await supabase
+                    .from('videos')
+                    .select('*', { count: 'exact' })
+                    .eq('user_id', user.id)
+                    .eq('is_hidden', false)
+                    .eq('type', type)
+                    .neq('id', video_id)
+                    .order('id', { ascending: false });
 
 
                 console.log('count===', totalCount, 'countError===', countError)
@@ -46,12 +45,20 @@ export const useNextVideo = () => {
                 }
 
                 // 生成一个随机偏移量
-                const randomOffset = Math.floor(Math.random() * count);
+                const randomOffset = Math.floor(Math.random() * totalCount);
 
                 console.log(`Random offset: ${randomOffset}`);
 
                 // 使用 limit 和 offset 取出一条记录
-                const { data, error } = await query.limit(1).offset(randomOffset);
+                const { data, error } = await supabase
+                    .from('videos')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('is_hidden', false)
+                    .eq('type', type)
+                    .neq('id', video_id)
+                    .order('id', { ascending: false })
+                    .range(randomOffset, randomOffset);
 
                 if (error) {
                     console.error('Error fetching random video:', error);
@@ -64,60 +71,24 @@ export const useNextVideo = () => {
                     return data[0];
                 }
             } else {
-                // 获取当前视频的创建时间
-                const { data: currentVideo, error: currentVideoError } = await supabase
+                const { data: firstVideo, error: firstVideoError } = await supabase
                     .from('videos')
-                    .select('created_at')
-                    .eq('id', video_id)
-                    .single();
-
-                if (currentVideoError) {
-                    console.error('Error fetching current video:', currentVideoError);
-                    throw currentVideoError;
-                }
-
-                if (!currentVideo) {
-                    console.log('Current video not found');
-                    throw new Error('Current video not found');
-                }
-
-                console.log(`Current video created_at: ${currentVideo.created_at}`);
-
-                // 获取下一个视频
-                const { data, error } = await query
-                    .gt('created_at', currentVideo.created_at)
-                    .order('created_at', { ascending: true })
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('is_hidden', false)
+                    .eq('type', type)
+                    .gt('id', video_id)
+                    .order('id', { ascending: true })
                     .limit(1);
 
-                if (error) {
-                    console.error('Error fetching next video:', error);
-                    throw error;
+                if (firstVideoError) {
+                    console.error('Error fetching first video:', firstVideoError);
+                    throw firstVideoError;
                 }
 
-                console.log(`Fetched next video:`, data);
+                console.log(`Fetched first video:`, firstVideo);
 
-                if (data && data.length > 0) {
-                    return data[0];
-                } else {
-                    console.log('No next video found, fetching first video');
-                    // 如果没有找到下一个视频，返回第一个视频
-                    const { data: firstVideo, error: firstVideoError } = await supabase
-                        .from('videos')
-                        .select('*')
-                        .eq('user_id', user.id)
-                        .eq('is_hidden', false)
-                        .order('created_at', { ascending: true })
-                        .limit(1);
-
-                    if (firstVideoError) {
-                        console.error('Error fetching first video:', firstVideoError);
-                        throw firstVideoError;
-                    }
-
-                    console.log(`Fetched first video:`, firstVideo);
-
-                    return firstVideo[0];
-                }
+                return firstVideo[0];
             }
 
             return null;
