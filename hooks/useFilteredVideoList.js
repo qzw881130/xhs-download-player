@@ -27,7 +27,7 @@ export const useFilteredVideoList = ({ type, initialPage = 1, pageSize = 10 }) =
 
             let query = supabase
                 .from('videos')
-                .select('id, vid,title, video_src, image_src, is_hidden', { count: 'exact' })
+                .select('id, vid,title, video_src, image_src, is_hidden, type', { count: 'exact' })
                 .eq('user_id', user.id)
                 .eq('is_hidden', false)
                 .eq('type', type)
