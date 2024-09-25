@@ -22,7 +22,7 @@ export const useNextVideo = () => {
                 // 获取符合条件的记录总数
                 const { count: totalCount, error: countError } = await supabase
                     .from('videos')
-                    .select('*', { count: 'exact' })
+                    .select('id, vid,title, video_src, image_src, is_hidden', { count: 'exact' })
                     .eq('user_id', user.id)
                     .eq('is_hidden', false)
                     .eq('type', type)
@@ -73,7 +73,7 @@ export const useNextVideo = () => {
             } else {
                 const { data: firstVideo, error: firstVideoError } = await supabase
                     .from('videos')
-                    .select('*')
+                    .select('id, vid,title, video_src, image_src, is_hidden')
                     .eq('user_id', user.id)
                     .eq('is_hidden', false)
                     .eq('type', type)

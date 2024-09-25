@@ -27,19 +27,6 @@ export const useUserStats = () => {
         try {
             console.log('Fetching stats for user:', user.id);
 
-            const { data: totalVideos, error: totalError } = await supabase
-                .from(table)
-                .select('id', { count: 'exact' })
-                .eq('user_id', user.id)
-                .not('video_src', 'is', null)  // 确保 video_src 不为 null
-                .not('video_src', 'eq', '')    // 确保 video_src 不为空字符串
-                ;
-
-            if (totalError) {
-                console.error('Error fetching total videos:', totalError);
-                throw totalError;
-            }
-
             const { data: likedVideos, error: likedError } = await supabase
                 .from(table)
                 .select('id', { count: 'exact' })
@@ -70,43 +57,12 @@ export const useUserStats = () => {
                 throw favoritedError;
             }
 
-            const { data: notedVideos, error: notedError } = await supabase
-                .from(table)
-                .select('id', { count: 'exact' })
-                .eq('user_id', user.id)
-                .eq('type', 'post')
-                .eq('is_hidden', false)
-                .not('video_src', 'is', null)  // 确保 video_src 不为 null
-                .not('video_src', 'eq', '')    // 确保 video_src 不为空字符串
-                ;
-
-            if (notedError) {
-                console.error('Error fetching noted videos:', notedError);
-                throw notedError;
-            }
-
-            const { data: hiddenVideos, error: hiddenError } = await supabase
-                .from(table)
-                .select('id', { count: 'exact' })
-                .eq('user_id', user.id)
-                .eq('is_hidden', true)
-                .not('video_src', 'is', null)  // 确保 video_src 不为 null
-                .not('video_src', 'eq', '')    // 确保 video_src 不为空字符串
-                ;
-
-            if (hiddenError) {
-                console.error('Error fetching hidden videos:', hiddenError);
-                throw hiddenError;
-            }
 
             console.log('Stats fetched successfully');
 
             setStats({
-                totalVideos: totalVideos.length,
                 likedVideos: likedVideos.length,
                 favoritedVideos: favoritedVideos.length,
-                notedVideos: notedVideos.length,
-                hiddenVideos: hiddenVideos.length,
             });
         } catch (err) {
             console.error('Error in fetchStats:', err);

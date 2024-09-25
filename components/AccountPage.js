@@ -83,12 +83,6 @@ export const AccountPage = ({ navigation }) => {
                     </Card>
                     <Card style={styles.card}>
                         <Card.Content style={styles.cardContent}>
-                            <Text style={styles.cardTitle}>总视频数: </Text>
-                            <Text>{stats.totalVideos}</Text>
-                        </Card.Content>
-                    </Card>
-                    <Card style={styles.card}>
-                        <Card.Content style={styles.cardContent}>
                             <Text style={styles.cardTitle}>点赞视频数: </Text>
                             <Text>{stats.likedVideos}</Text>
                         </Card.Content>
@@ -97,18 +91,6 @@ export const AccountPage = ({ navigation }) => {
                         <Card.Content style={styles.cardContent}>
                             <Text style={styles.cardTitle}>收藏视频数: </Text>
                             <Text>{stats.favoritedVideos}</Text>
-                        </Card.Content>
-                    </Card>
-                    <Card style={styles.card}>
-                        <Card.Content style={styles.cardContent}>
-                            <Text style={styles.cardTitle}>笔记视频数: </Text>
-                            <Text>{stats.notedVideos}</Text>
-                        </Card.Content>
-                    </Card>
-                    <Card style={styles.card}>
-                        <Card.Content style={styles.cardContent}>
-                            <Text style={styles.cardTitle}>隐藏视频数: </Text>
-                            <Text>{stats.hiddenVideos}</Text>
                         </Card.Content>
                     </Card>
                 </View>
