@@ -137,6 +137,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         marginBottom: 16,
         textAlign: 'center',
+        color: '#333'
     },
     input: {
         marginBottom: 12,
@@ -148,6 +149,7 @@ const styles = StyleSheet.create({
     },
     label: {
         margin: 8,
+        color: '#333'
     },
     button: {
         marginTop: 10,
