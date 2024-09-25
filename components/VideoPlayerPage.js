@@ -117,16 +117,24 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
 
     useEffect(() => {
         console.log('Video URL:', videoUrl);
+        if (!videoUrl) {
+            console.error('Invalid video URL');
+            return;
+        }
         // 尝试预加载视频
         if (videoRef.current) {
             videoRef.current.loadAsync({ uri: videoUrl }, {}, false)
                 .then(() => console.log('Video preloaded successfully'))
                 .catch(error => console.error('Error preloading video:', error));
         }
-    }, []);
+    }, [videoUrl]);
 
     const handlePlayPress = async () => {
         console.log('Play button pressed');
+        if (!videoUrl) {
+            console.error('No video URL available');
+            return;
+        }
         if (videoRef.current) {
             try {
                 const status = await videoRef.current.getStatusAsync();
@@ -135,6 +143,8 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                 if (!status.isLoaded) {
                     console.log('Video not loaded, attempting to load...');
                     await videoRef.current.loadAsync({ uri: videoUrl }, {}, false);
+                    const newStatus = await videoRef.current.getStatusAsync();
+                    console.log('New video status after loading:', newStatus);
                 }
 
                 if (isPlaying) {
@@ -148,6 +158,8 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                 setIsPlaying(!isPlaying);
             } catch (error) {
                 console.error('Error playing/pausing video:', error);
+                setIsLoading(false);
+                // 可以在这里添加一个用户提示，比如显示一个错误消息
             }
         } else {
             console.log('Video ref is null');
@@ -167,7 +179,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     }, [video]);
 
     const onPlaybackStatusUpdate = (status) => {
-        console.log('Playback status:', status);
+        // console.log('Playback status:', status);
         if (status.isLoaded) {
             setIsLoading(false);
             // 视频加载成功后的处理
@@ -186,7 +198,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
             <StatusBar style="light" translucent backgroundColor="transparent" />
             <Video
                 ref={videoRef}
-                source={{ uri: videoUrl }}
+                source={videoUrl ? { uri: videoUrl } : undefined}
                 style={styles.video}
                 resizeMode="contain"
                 isLooping={playMode === 'single'}
@@ -197,6 +209,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                 onError={(error) => {
                     console.error('Video playback error:', error);
                     setIsLoading(false);
+                    // 可以在这里添加一个用户提示，比如显示一个错误消息
                 }}
                 onLoad={() => setIsLoading(false)}
                 onLoadStart={() => setIsLoading(true)}
