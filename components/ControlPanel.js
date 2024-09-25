@@ -1,16 +1,54 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Button, SegmentedButtons, RadioButton } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const ControlPanel = ({
-    playSpeed,
-    handlePlaySpeedChange,
-    playMode,
-    handlePlayModeChange,
-    playOrder,
-    handlePlayOrderChange,
-    closeSettings
-}) => {
+export const ControlPanel = ({ closeSettings, saveSetting = () => { } }) => {
+    const [playMode, setPlayMode] = useState('single');
+    const [playOrder, setPlayOrder] = useState('order');
+    const [playSpeed, setPlaySpeed] = useState('1x');
+
+    useEffect(() => {
+        loadSettings();
+    }, []);
+
+    const loadSettings = async () => {
+        try {
+            const savedPlayMode = await AsyncStorage.getItem('playMode');
+            const savedPlayOrder = await AsyncStorage.getItem('playOrder');
+            const savedPlaySpeed = await AsyncStorage.getItem('playSpeed');
+            if (savedPlayMode) setPlayMode(savedPlayMode);
+            if (savedPlayOrder) setPlayOrder(savedPlayOrder);
+            if (savedPlaySpeed) setPlaySpeed(savedPlaySpeed);
+        } catch (error) {
+            console.error('Error loading settings:', error);
+        }
+    };
+
+    const saveSettings = async (key, value) => {
+        try {
+            await AsyncStorage.setItem(key, value);
+            saveSetting();
+        } catch (error) {
+            console.error('Error saving settings:', error);
+        }
+    };
+
+    const handlePlayModeChange = (value) => {
+        setPlayMode(value);
+        saveSettings('playMode', value);
+    };
+
+    const handlePlayOrderChange = (value) => {
+        setPlayOrder(value);
+        saveSettings('playOrder', value);
+    };
+
+    const handlePlaySpeedChange = (value) => {
+        setPlaySpeed(value);
+        saveSettings('playSpeed', value);
+    };
+
     return (
         <View style={styles.drawerContainer}>
             <View style={styles.header}>

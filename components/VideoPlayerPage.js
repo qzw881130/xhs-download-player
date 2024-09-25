@@ -15,19 +15,18 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     const insets = useSafeAreaInsets();
     const [lastSwipeTime, setLastSwipeTime] = useState(0);
     const [isSettingsVisible, setIsSettingsVisible] = useState(false);
-    const [activeSettings, setActiveSettings] = useState('');
-    const slideAnim = useRef(new Animated.Value(300)).current; // Start from 300 (off-screen)
-    const [playMode, setPlayMode] = useState('single');
-    const [playOrder, setPlayOrder] = useState('order');
-    const [playSpeed, setPlaySpeed] = useState('1x');
-    const [isPlaying, setIsPlaying] = useState(true);  // Set initial state to true
+    const slideAnim = useRef(new Animated.Value(300)).current;
+    const [isPlaying, setIsPlaying] = useState(true);
     const videoRef = useRef(null);
     const [showCover, setShowCover] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
     const { getNextVideo, loading: loadingNextVideo } = useNextVideo();
 
+    const [playMode, setPlayMode] = useState('single');
+    const [playOrder, setPlayOrder] = useState('order');
+    const [playSpeed, setPlaySpeed] = useState('1x');
+
     useEffect(() => {
-        // Load saved settings when component mounts
         loadSettings();
     }, []);
 
@@ -42,32 +41,6 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
         } catch (error) {
             console.error('Error loading settings:', error);
         }
-    };
-
-    const saveSettings = async (key, value) => {
-        try {
-            await AsyncStorage.setItem(key, typeof value === 'boolean' ? JSON.stringify(value) : value);
-        } catch (error) {
-            console.error('Error saving settings:', error);
-        }
-    };
-
-    const handlePlayModeChange = (value) => {
-        setPlayMode(value);
-        saveSettings('playMode', value);
-        console.log(`Play mode changed to: ${value}`);
-    };
-
-    const handlePlayOrderChange = (value) => {
-        setPlayOrder(value);
-        saveSettings('playOrder', value);
-        console.log(`Play order changed to: ${value}`);
-    };
-
-    const handlePlaySpeedChange = (value) => {
-        setPlaySpeed(value);
-        saveSettings('playSpeed', value);
-        console.log(`Play speed changed to: ${value}`);
     };
 
     const panResponder = useRef(
@@ -189,6 +162,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     };
 
     const onVideoEnd = async () => {
+        const playMode = await AsyncStorage.getItem('playMode') || 'single';
         if (playMode === 'single') {
             await videoRef.current.replayAsync();
         } else if (playMode === 'auto') {
@@ -310,13 +284,8 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                                 ]}
                             >
                                 <ControlPanel
-                                    playSpeed={playSpeed}
-                                    handlePlaySpeedChange={handlePlaySpeedChange}
-                                    playMode={playMode}
-                                    handlePlayModeChange={handlePlayModeChange}
-                                    playOrder={playOrder}
-                                    handlePlayOrderChange={handlePlayOrderChange}
                                     closeSettings={closeSettings}
+                                    saveSetting={loadSettings}
                                 />
                             </Animated.View>
                         </TouchableWithoutFeedback>
