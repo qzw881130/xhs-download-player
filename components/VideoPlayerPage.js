@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Video } from 'expo-av';
 import { ControlPanel } from './ControlPanel';
 import { useNextVideo } from '../hooks/useNextVideo';
+import Slider from '@react-native-community/slider';
 
 const { width, height } = Dimensions.get('window');
 
@@ -27,6 +28,10 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     const [playSpeed, setPlaySpeed] = useState('1x');
 
     const [showTip, setShowTip] = useState(false);
+
+    const [progress, setProgress] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [isSeeking, setIsSeeking] = useState(false);
 
     useEffect(() => {
         const checkFirstTime = async () => {
@@ -188,17 +193,28 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     }, [video]);
 
     const onPlaybackStatusUpdate = (status) => {
-        // console.log('Playback status:', status);
         if (status.isLoaded) {
             setIsLoading(false);
-            // 视频加载成功后的处理
+            if (!isSeeking) {
+                setProgress(status.positionMillis / status.durationMillis);
+            }
+            setDuration(status.durationMillis);
             if (status.didJustFinish) {
                 onVideoEnd();
             }
         } else {
-            // 视频加载失败的处理
             console.error('Video failed to load:', status.error);
             setIsLoading(false);
+        }
+    };
+
+    const handleSeek = async (value) => {
+        if (videoRef.current) {
+            setIsSeeking(true);
+            const newPosition = value * duration;
+            await videoRef.current.setPositionAsync(newPosition);
+            setProgress(value);
+            setIsSeeking(false);
         }
     };
 
@@ -216,6 +232,13 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                 console.error('Error toggling play/pause:', error);
             }
         }
+    };
+
+    const formatTime = (milliseconds) => {
+        const totalSeconds = Math.floor(milliseconds / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
 
     return (
@@ -264,6 +287,23 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                     )}
                 </View>
             </TouchableWithoutFeedback>
+            <View style={styles.progressContainer}>
+                <Slider
+                    style={styles.progressBar}
+                    value={progress}
+                    onValueChange={setProgress}
+                    onSlidingComplete={handleSeek}
+                    minimumValue={0}
+                    maximumValue={1}
+                    minimumTrackTintColor="#FFFFFF"
+                    maximumTrackTintColor="rgba(255, 255, 255, 0.5)"
+                    thumbTintColor="#FFFFFF"
+                />
+                <View style={styles.timeContainer}>
+                    <Text style={styles.timeText}>{formatTime(progress * duration)}</Text>
+                    <Text style={styles.timeText}>{formatTime(duration)}</Text>
+                </View>
+            </View>
             <View style={styles.content}>
                 <View style={styles.titleContainer}>
                     <View style={styles.badgeContainer}>
@@ -334,7 +374,8 @@ const styles = StyleSheet.create({
     content: {
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'flex-end',  // 将内容移到底部
-        padding: 16,
+        padding: 0,
+        bottom: 60
     },
     headerGradient: {
         position: 'absolute',
@@ -425,5 +466,26 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    progressContainer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        padding: 10,
+    },
+    progressBar: {
+        width: '100%',
+        height: 40,
+    },
+    timeContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 5,
+    },
+    timeText: {
+        color: '#FFFFFF',
+        fontSize: 12,
     },
 });
