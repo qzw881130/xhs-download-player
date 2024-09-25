@@ -7,7 +7,7 @@ import { useFilteredVideoList } from '../hooks/useFilteredVideoList';
 const { width } = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 24) / 2;
 
-export const VideoListPage = ({ title, type, data, onVideoPress }) => {
+export const VideoListPage = ({ title, type, onVideoPress }) => {
     const [menuVisible, setMenuVisible] = useState(false);
     const [searchVisible, setSearchVisible] = useState(false);
     const itemsPerPage = 10;
@@ -119,9 +119,8 @@ export const VideoListPage = ({ title, type, data, onVideoPress }) => {
             <SearchModal
                 visible={searchVisible}
                 onDismiss={() => setSearchVisible(false)}
-                onSearch={handleSearch}
-                data={data}
                 onVideoPress={onVideoPress}
+                type={type}  // 添加这一行，传入当前页面的类型
             />
         </View>
     );

@@ -1,32 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, FlatList, TouchableOpacity, Dimensions } from 'react-native';
-import { Modal, Portal, Searchbar, IconButton, Text, Card, Button, Menu } from 'react-native-paper';
+import { Modal, Portal, Searchbar, IconButton, Text, Card, Button, Menu, ActivityIndicator } from 'react-native-paper';
+import { useFilteredVideoList } from '../hooks/useFilteredVideoList';
 
 const { width } = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 32) / 2; // 调整列宽，为间距留出空间
 
-const SearchModal = ({ visible, onDismiss, onSearch, data, onVideoPress }) => {
+const SearchModal = ({ visible, onDismiss, onVideoPress, type }) => {
     const [searchQuery, setSearchQuery] = useState('');
-    const [filteredData, setFilteredData] = useState([]);
-    const [page, setPage] = useState(1);
     const [menuVisible, setMenuVisible] = useState(false);
     const itemsPerPage = 10;
 
-    const onChangeSearch = query => setSearchQuery(query);
+    const {
+        filteredData,
+        loading,
+        error,
+        hasMore,
+        loadMore,
+        refresh,
+        search,
+        setKeyword,
+        count,
+        pageSize,
+        pages,
+        page,
+        setPage
+    } = useFilteredVideoList({ type, pageSize: itemsPerPage });
 
-    const handleSearch = () => {
-        const filtered = data.filter(item =>
-            item.title.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setFilteredData(filtered);
-        setPage(1);
-        onSearch(searchQuery);
+    const onChangeSearch = query => {
+        setSearchQuery(query);
+        // search(query);
     };
 
     const renderItem = ({ item }) => (
         <TouchableOpacity onPress={() => onVideoPress(item)}>
             <Card style={styles.card}>
-                <Card.Cover source={{ uri: item.image }} style={styles.cardImage} />
+                <Card.Cover source={{ uri: item.image_src }} style={styles.cardImage} />
                 <Card.Content>
                     <Text numberOfLines={2} style={styles.cardTitle}>{item.title}</Text>
                 </Card.Content>
@@ -34,10 +43,9 @@ const SearchModal = ({ visible, onDismiss, onSearch, data, onVideoPress }) => {
         </TouchableOpacity>
     );
 
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const openMenu = () => setMenuVisible(true);
     const closeMenu = () => setMenuVisible(false);
-    const pageOptions = Array.from({ length: totalPages }, (_, i) => i + 1);
+    const pageOptions = Array.from({ length: pages }, (_, i) => i + 1);
 
     return (
         <Portal>
@@ -58,26 +66,24 @@ const SearchModal = ({ visible, onDismiss, onSearch, data, onVideoPress }) => {
                         onChangeText={onChangeSearch}
                         value={searchQuery}
                         style={styles.searchbar}
-                        onSubmitEditing={handleSearch}
-                        right={() => (
-                            <IconButton
-                                icon="magnify"
-                                size={24}
-                                onPress={handleSearch}
-                            />
-                        )}
+                        onSubmitEditing={() => search(searchQuery)}
                     />
                 </View>
+                <Text style={styles.resultCount}>共找到 {count} 个结果</Text>
                 <FlatList
-                    data={filteredData.slice((page - 1) * itemsPerPage, page * itemsPerPage)}
+                    data={filteredData}
                     renderItem={renderItem}
-                    keyExtractor={item => item.id}
+                    keyExtractor={item => item.id.toString()}
                     numColumns={2}
                     columnWrapperStyle={styles.row}
                     contentContainerStyle={styles.listContent}
                     ListEmptyComponent={<Text style={styles.emptyText}>暂无数据</Text>}
+                    onEndReached={loadMore}
+                    onEndReachedThreshold={0.1}
+                    refreshing={loading}
+                    onRefresh={refresh}
                 />
-                {totalPages > 1 && (
+                {pages > 1 && (
                     <View style={styles.pagination}>
                         <Button
                             onPress={() => setPage(p => Math.max(1, p - 1))}
@@ -106,8 +112,8 @@ const SearchModal = ({ visible, onDismiss, onSearch, data, onVideoPress }) => {
                             ))}
                         </Menu>
                         <Button
-                            onPress={() => setPage(p => Math.min(totalPages, p + 1))}
-                            disabled={page === totalPages}
+                            onPress={() => setPage(p => Math.min(pages, p + 1))}
+                            disabled={page === pages}
                         >
                             下一页
                         </Button>
@@ -135,12 +141,19 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 10,
+        paddingHorizontal: 8,
     },
     backIcon: {
         marginRight: 8,
     },
     searchbar: {
         flex: 1,
+    },
+    resultCount: {
+        paddingHorizontal: 16,
+        paddingBottom: 8,
+        fontSize: 14,
+        color: '#666',
     },
     row: {
         justifyContent: 'space-between',
@@ -151,7 +164,7 @@ const styles = StyleSheet.create({
     },
     card: {
         width: COLUMN_WIDTH,
-        marginBottom: 16, // 增加底部间距
+        marginBottom: 16,
     },
     cardImage: {
         height: COLUMN_WIDTH * 1.5,
@@ -169,6 +182,11 @@ const styles = StyleSheet.create({
     emptyText: {
         textAlign: 'center',
         marginTop: 20,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 
