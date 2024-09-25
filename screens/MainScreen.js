@@ -19,7 +19,7 @@ function MainScreen() {
     const [routes] = useState([
         { key: 'liked', title: '点赞', icon: 'heart' },
         { key: 'collected', title: '收藏', icon: 'star' },
-        { key: 'post', title: '笔记', icon: 'notebook' },
+        // { key: 'post', title: '笔记', icon: 'notebook' },
         // { key: 'about', title: '关于', icon: 'information' },
         { key: 'account', title: '帐号', icon: 'account' },
     ]);
