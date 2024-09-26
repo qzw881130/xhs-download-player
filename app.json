@@ -4,9 +4,9 @@
     "slug": "XhsDownloadPlayer",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon-red-leaf.png",
+    "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash-car.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -23,7 +23,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon-red-leaf.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       }
     },
