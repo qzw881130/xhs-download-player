@@ -22,6 +22,8 @@ magick bc3b84d22bb3fc69f9ad235b8bdfe50d.jpg -resize "1284\!x2778\!" splash_car.p
 magick icon-red-leaf.png  -resize "48\!x48\!" favicon.png
 ```
 
+## Privacy Policy
+* https://qzw881130.github.io/files/xhs-download-video/privacy-policy.html
 
 ## Reference
 * [Download image](https://www.pinterest.com/pin/625578204504140036/)

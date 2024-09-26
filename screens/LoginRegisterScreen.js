@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Text, TextInput, Button, ActivityIndicator, Checkbox } from 'react-native-paper';
+import { Text, TextInput, Button, ActivityIndicator, Checkbox, Snackbar } from 'react-native-paper';
 import { useSupabase } from '../contexts/SupabaseContext';
 
 export default function LoginRegisterScreen() {
@@ -12,6 +12,10 @@ export default function LoginRegisterScreen() {
     const [rememberMe, setRememberMe] = useState(false);
     const navigation = useNavigation();
     const { user, supabase } = useSupabase();
+    const [visible, setVisible] = React.useState(false);
+    const onToggleSnackBar = () => setVisible(!visible);
+    const onDismissSnackBar = () => setVisible(false);
+    const [error, setError] = useState('');
 
     useEffect(() => {
         const checkAuthStatus = async () => {
@@ -53,7 +57,9 @@ export default function LoginRegisterScreen() {
         try {
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) {
-                alert(error.message);
+                setVisible(true);
+                if (error.message == 'Invalid login credentials') setError('帐号密码错误或帐号不存在');
+                else setError(error.message);
             } else {
                 if (rememberMe) {
                     await AsyncStorage.setItem('email', email);
@@ -99,47 +105,55 @@ export default function LoginRegisterScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>登陆&注册</Text>
-            <TextInput
-                label="邮箱"
-                value={email}
-                onChangeText={(text) => setEmail(text.toLowerCase())}
-                style={styles.input}
-            />
-            <TextInput
-                label="密码"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-                style={styles.input}
-            />
-            <View style={styles.checkboxContainer}>
-                <Checkbox
-                    status={rememberMe ? 'checked' : 'unchecked'}
-                    onPress={() => setRememberMe(!rememberMe)}
-                    style={{ borderWidth: 1, borderColor: 'black' }}
+        <>
+            <View style={styles.container}>
+                <Text style={styles.title}>登陆&注册</Text>
+                <TextInput
+                    label="邮箱"
+                    value={email}
+                    onChangeText={(text) => setEmail(text.toLowerCase())}
+                    style={styles.input}
                 />
-                <Text
-                    style={styles.label}
-                    onPress={() => setRememberMe(!rememberMe)}
-                >
-                    记住我
-                </Text>
+                <TextInput
+                    label="密码"
+                    secureTextEntry
+                    value={password}
+                    onChangeText={setPassword}
+                    style={styles.input}
+                />
+                <View style={styles.checkboxContainer}>
+                    <Checkbox
+                        status={rememberMe ? 'checked' : 'unchecked'}
+                        onPress={() => setRememberMe(!rememberMe)}
+                        style={{ borderWidth: 1, borderColor: 'black' }}
+                    />
+                    <Text
+                        style={styles.label}
+                        onPress={() => setRememberMe(!rememberMe)}
+                    >
+                        记住我
+                    </Text>
+                </View>
+                {loading ? (
+                    <ActivityIndicator size="large" animating={true} color="#0000ff" />
+                ) : (
+                    <>
+                        <Button mode="contained" onPress={handleLogin} style={styles.button}>
+                            登陆
+                        </Button>
+                        <Button mode="contained" onPress={handleRegister} style={styles.button}>
+                            注册
+                        </Button>
+                    </>
+                )}
             </View>
-            {loading ? (
-                <ActivityIndicator size="large" animating={true} color="#0000ff" />
-            ) : (
-                <>
-                    <Button mode="contained" onPress={handleLogin} style={styles.button}>
-                        登陆
-                    </Button>
-                    <Button mode="contained" onPress={handleRegister} style={styles.button}>
-                        注册
-                    </Button>
-                </>
-            )}
-        </View>
+            <Snackbar
+                visible={visible}
+                onDismiss={onDismissSnackBar}
+                action={{}}>
+                {error}
+            </Snackbar>
+        </>
     );
 }
 
