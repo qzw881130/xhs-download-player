@@ -226,6 +226,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     };
 
     const togglePlayPause = async () => {
+        console.log('togglePlayPause')
         if (videoRef.current) {
             try {
                 if (isPlaying) {
@@ -249,7 +250,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     };
 
     return (
-        <View style={styles.container} {...panResponder.panHandlers}>
+        <View style={styles.container}   {...panResponder.panHandlers}>
             <StatusBar style="light" translucent backgroundColor="transparent" />
             <TouchableWithoutFeedback onPress={togglePlayPause}>
                 <View style={styles.videoContainer}>
@@ -371,6 +372,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'black',
+        borderWidth: 1,
+        borderColor: 'yellow',
     },
     cover: {
         ...StyleSheet.absoluteFillObject,
@@ -390,6 +393,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: 100, // 调整这个值以适应你的需求
+        zIndex: 1
     },
     header: {
         backgroundColor: 'transparent',
@@ -432,6 +436,7 @@ const styles = StyleSheet.create({
         bottom: 0,
         backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'flex-end',
+        zIndex: 1
     },
     video: {
         ...StyleSheet.absoluteFillObject,
@@ -448,6 +453,9 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'green',
+        zIndex: 1
     },
     playButtonContainer: {
         ...StyleSheet.absoluteFillObject,
@@ -481,6 +489,9 @@ const styles = StyleSheet.create({
         right: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         padding: 10,
+        borderColor: 'red',
+        borderWidth: 2,
+        zIndex: 1
     },
     progressBar: {
         width: '100%',

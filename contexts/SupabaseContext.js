@@ -1,34 +1,18 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { useSupabaseClient } from '../hooks/useSupabaseClient';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@env';
 
 const SupabaseContext = createContext(null);
 
 export const SupabaseProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [session, setSession] = useState(null);
-    const supabase = useSupabaseClient();
-    useEffect(() => {
-        // 检查当前会话并设置用户
-        const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            setUser(session?.user || null);
-        };
-
-        checkSession();
-
-        // 监听认证状态的变化
-        const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-            setUser(session?.user || null);
-        });
-
-        return () => {
-            authListener?.unsubscribe();
-        };
-    }, []);
+    const supabase = useMemo(() => createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false,
+    }), []);
 
     return (
-        <SupabaseContext.Provider value={{ supabase, user, session }}>
+        <SupabaseContext.Provider value={supabase}>
             {children}
         </SupabaseContext.Provider>
     );
