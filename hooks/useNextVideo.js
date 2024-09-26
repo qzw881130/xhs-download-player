@@ -16,7 +16,7 @@ export const useNextVideo = () => {
         setError(null);
 
         try {
-            console.log(`Fetching next video. Current video ID: ${video_id}, Is random: ${is_random}`);
+            console.log(`Fetching next video. Current video ID: ${video_id}, Type: ${type}, Is random: ${is_random}`);
 
             if (!!is_random) {
                 // 获取符合条件的记录总数

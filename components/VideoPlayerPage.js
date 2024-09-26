@@ -357,13 +357,13 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
                             />
                         </View>
                     )}
-                    {/* {nextVideo && (
+                    {nextVideo && (
                         <Video
                             source={{ uri: nextVideo.video_src }}
                             style={{ width: 0, height: 0 }}
                             preload="auto"
                         />
-                    )} */}
+                    )}
                 </View>
             </TouchableWithoutFeedback>
             <View style={styles.progressContainer}>
