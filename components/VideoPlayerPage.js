@@ -372,8 +372,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'black',
-        borderWidth: 1,
-        borderColor: 'yellow',
+        // borderWidth: 1,
+        // borderColor: 'yellow',
     },
     cover: {
         ...StyleSheet.absoluteFillObject,
@@ -453,9 +453,8 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'green',
-        zIndex: 1
+        // borderWidth: 1,
+        // borderColor: 'green'
     },
     playButtonContainer: {
         ...StyleSheet.absoluteFillObject,
@@ -489,8 +488,8 @@ const styles = StyleSheet.create({
         right: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         padding: 10,
-        borderColor: 'red',
-        borderWidth: 2,
+        // borderColor: 'red',
+        // borderWidth: 2,
         zIndex: 1
     },
     progressBar: {

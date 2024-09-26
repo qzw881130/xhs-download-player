@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSupabase } from '../contexts/SupabaseContext';
 
 export const useUserStats = () => {
+    const table = 'videos';
     const { supabase, user } = useSupabase();
     const [stats, setStats] = useState({
         totalVideos: 0,
@@ -26,22 +27,15 @@ export const useUserStats = () => {
         try {
             console.log('Fetching stats for user:', user.id);
 
-            const { data: totalVideos, error: totalError } = await supabase
-                .from('xhs-video')
-                .select('id', { count: 'exact' })
-                .eq('user_id', user.id);
-
-            if (totalError) {
-                console.error('Error fetching total videos:', totalError);
-                throw totalError;
-            }
-
             const { data: likedVideos, error: likedError } = await supabase
-                .from('xhs-video')
+                .from(table)
                 .select('id', { count: 'exact' })
                 .eq('user_id', user.id)
                 .eq('type', 'liked')
-                .eq('is_hidden', false);
+                .eq('is_hidden', false)
+                .not('video_src', 'is', null)  // 确保 video_src 不为 null
+                .not('video_src', 'eq', '')    // 确保 video_src 不为空字符串
+                ;
 
             if (likedError) {
                 console.error('Error fetching liked videos:', likedError);
@@ -49,31 +43,23 @@ export const useUserStats = () => {
             }
 
             const { data: favoritedVideos, error: favoritedError } = await supabase
-                .from('xhs-video')
+                .from(table)
                 .select('id', { count: 'exact' })
                 .eq('user_id', user.id)
                 .eq('type', 'collected')
-                .eq('is_hidden', false);
+                .eq('is_hidden', false)
+                .not('video_src', 'is', null)  // 确保 video_src 不为 null
+                .not('video_src', 'eq', '')    // 确保 video_src 不为空字符串
+                ;
 
             if (favoritedError) {
                 console.error('Error fetching favorited videos:', favoritedError);
                 throw favoritedError;
             }
 
-            const { data: notedVideos, error: notedError } = await supabase
-                .from('xhs-video')
-                .select('id', { count: 'exact' })
-                .eq('user_id', user.id)
-                .eq('type', 'post')
-                .eq('is_hidden', false);
 
-            if (notedError) {
-                console.error('Error fetching noted videos:', notedError);
-                throw notedError;
-            }
+            console.log('Stats fetched successfully');
 
-            const { data: hiddenVideos, error: hiddenError } = await supabase
-                .from('xhs-video')
             setStats({
                 likedVideos: likedVideos.length,
                 favoritedVideos: favoritedVideos.length,

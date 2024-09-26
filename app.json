@@ -22,6 +22,7 @@
       "buildNumber": "4"
     },
     "android": {
+      "package": "com.qianzhiwei5921.XhsDownloadPlayer",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
