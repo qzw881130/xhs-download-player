@@ -86,15 +86,16 @@ export const ControlPanel = ({ closeSettings, saveSetting = () => { } }) => {
                                 style={styles.radioButtonRow}
                                 onPress={() => handlePlayModeChange('single')}
                             >
-                                <RadioButton value="single" />
                                 <Text style={styles.radioButtonLabel}>单视频循环</Text>
+                                <RadioButton value="single" />
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.radioButtonRow}
                                 onPress={() => handlePlayModeChange('auto')}
                             >
-                                <RadioButton value="auto" />
+
                                 <Text style={styles.radioButtonLabel}>自动播放下一个</Text>
+                                <RadioButton value="auto" />
                             </TouchableOpacity>
                         </View>
                     </RadioButton.Group>
@@ -113,15 +114,16 @@ export const ControlPanel = ({ closeSettings, saveSetting = () => { } }) => {
                                 style={styles.radioButtonRow}
                                 onPress={() => handlePlayOrderChange('order')}
                             >
-                                <RadioButton value="order" />
                                 <Text style={styles.radioButtonLabel}>顺序播放</Text>
+                                <RadioButton value="order" />
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.radioButtonRow}
                                 onPress={() => handlePlayOrderChange('random')}
                             >
-                                <RadioButton value="random" />
+
                                 <Text style={styles.radioButtonLabel}>随机播放</Text>
+                                <RadioButton value="random" />
                             </TouchableOpacity>
                         </View>
                     </RadioButton.Group>
