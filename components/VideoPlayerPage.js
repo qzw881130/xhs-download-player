@@ -382,10 +382,14 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
     },
     content: {
-        ...StyleSheet.absoluteFillObject,
-        justifyContent: 'flex-end',  // 将内容移到底部
+        position: 'absolute',
         padding: 0,
-        bottom: 70
+        bottom: 80,
+        left: 0,
+        borderWidth: 0,
+        borderColor: 'orange',
+        height: 65,
+        width: '100%'
     },
     headerGradient: {
         position: 'absolute',
