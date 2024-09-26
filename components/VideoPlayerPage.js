@@ -338,9 +338,9 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
                         shouldCorrectPitch={true}
                         preload="auto"
                     />
-                    {/* {showCover && (
+                    {showCover && (
                         <Image source={{ uri: video.image_src }} style={styles.cover} />
-                    )} */}
+                    )}
                     {isLoading && (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color="#FFFFFF" />
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     content: {
         position: 'absolute',
         padding: 0,
-        bottom: 80,
+        bottom: 85,
         left: 0,
         borderWidth: 0,
         borderColor: 'orange',
@@ -558,13 +558,13 @@ const styles = StyleSheet.create({
     },
     progressContainer: {
         position: 'absolute',
-        bottom: 0,
+        bottom: 5,
         left: 0,
         right: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         padding: 10,
-        // borderColor: 'red',
-        // borderWidth: 2,
+        borderColor: 'red',
+        borderWidth: 0,
         zIndex: 1
     },
     progressBar: {
