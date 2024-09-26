@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { View, StyleSheet, Dimensions, Image, TouchableOpacity, PanResponder, TouchableWithoutFeedback, Animated, ActivityIndicator } from 'react-native';
 import { Appbar, IconButton, Text, Snackbar } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,7 +12,7 @@ import Slider from '@react-native-community/slider';
 
 const { width, height } = Dimensions.get('window');
 
-export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
+export const VideoPlayerPage = ({ srcVideo, onClose }) => {
     const insets = useSafeAreaInsets();
     const [lastSwipeTime, setLastSwipeTime] = useState(0);
     const [isSettingsVisible, setIsSettingsVisible] = useState(false);
@@ -22,6 +22,9 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     const [showCover, setShowCover] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
     const { getNextVideo, loading: loadingNextVideo } = useNextVideo();
+    const [nextVideo, setNextVideo] = useState({});
+    const nextVideoRef = useRef(nextVideo);
+    const [signal, setSignal] = useState(0);
 
     const [playMode, setPlayMode] = useState('single');
     const [playOrder, setPlayOrder] = useState('order');
@@ -32,6 +35,19 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
     const [isSeeking, setIsSeeking] = useState(false);
+
+    const [video, setVideo] = useState(srcVideo);
+
+    const onNextVideo = (nextVideo) => {
+        console.log('trigger onNextVideo=====onNextVideo,', nextVideo?.id)
+        setVideo(nextVideo);
+    }
+
+    const nextVideo2 = nextVideo;
+    useEffect(() => {
+        nextVideoRef.current = nextVideo; // update the ref whenever nextVideo changes
+        console.log('nextVideo====', nextVideoRef.current)
+    }, [nextVideo]);
 
     useEffect(() => {
         const checkFirstTime = async () => {
@@ -71,13 +87,13 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                 const now = Date.now();
                 if (gestureState.dy < -50 && now - lastSwipeTime > 500) {  // 向上滑动超过50个单位，且距离上次滑动超过500ms
                     console.log('Swiped up, fetching next video');
+                    console.log('onPanResponderRelease===', now, 'nextVideoRef.current===', nextVideoRef.current);
                     setIsLoading(true);
                     if (isPlaying) {
-                        await videoRef.current.pauseAsync();
-
+                        // await videoRef.current.pauseAsync();
                     }
 
-                    handleNextVideo();
+                    if (nextVideoRef.current?.id) await handleNextVideo();
                     setLastSwipeTime(now);
                 }
             },
@@ -112,30 +128,42 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
         });
     };
 
-    const videoUrl = video.video_src;
-
     useEffect(() => {
-        console.log('Video URL:', videoUrl);
-        if (!videoUrl) {
-            console.error('Invalid video URL');
-            handleNextVideo()
-            return;
-        }
-        // 尝试预加载视频
-        if (videoRef.current) {
-            videoRef.current.loadAsync({ uri: videoUrl }, {}, false)
-                .then(() => {
+
+        const loadVideo = async () => {
+            console.log('Video URL:', video.id, video.video_src);
+            if (!video.video_src) {
+                console.error('Invalid video URL');
+                handleNextVideo()
+                return;
+            }
+            // 尝试预加载视频
+            if (videoRef.current) {
+                console.log('videoRef.current ?????????');
+                await videoRef.current.getStatusAsync();
+                try {
+                    await videoRef.current.loadAsync({ uri: video.video_src }, { shouldPlay: true }, false);
                     console.log('Video preloaded successfully');
                     setShowCover(false);  // Hide cover when video is loaded
+
+                    const status = await videoRef.current.getStatusAsync();
+                    // console.log('Current video status:', status);
+
                     videoRef.current.playAsync();  // Start playing the video
-                })
-                .catch(error => console.error('Error preloading video:', error));
+                } catch (error) {
+                    console.log('Error preloading video:', error)
+                }
+            } else {
+                console.log('videoRef.current=======false')
+            }
         }
-    }, [videoUrl]);
+        loadVideo();
+        return () => { }
+    }, [video]);
 
     const handlePlayPress = async () => {
         console.log('Play button pressed');
-        if (!videoUrl) {
+        if (!video.video_src) {
             console.error('No video URL available');
             return;
         }
@@ -146,7 +174,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
 
                 if (!status.isLoaded) {
                     console.log('Video not loaded, attempting to load...');
-                    await videoRef.current.loadAsync({ uri: videoUrl }, {}, false);
+                    await videoRef.current.loadAsync({ uri: video.video_src }, {}, false);
                     const newStatus = await videoRef.current.getStatusAsync();
                     console.log('New video status after loading:', newStatus);
                 }
@@ -170,20 +198,44 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
         }
     };
 
-    const handleNextVideo = async () => {
+    const fetchNextVideo = async () => {
         try {
             const playOrder = await AsyncStorage.getItem('playOrder');
-            const nextVideo = await getNextVideo(video.id, video.type, playOrder === 'random');
-            console.log('nextVideo====', nextVideo ? nextVideo.id : 'No next video found');
-            if (nextVideo) {
-                onNextVideo(nextVideo);
-            } else {
-                console.log('No next video available');
-                // 可以在这里添加一些用户反馈，比如显示一个提示消息
-            }
+            const next = await getNextVideo(video.id, video.type, playOrder === 'random');
+            console.log('prepare done id=', next.id);
+            setNextVideo(next);
         } catch (error) {
-            console.error('Error getting next video:', error);
-            // 可以在这里添加一些错误处理，比如显示一个错误消息
+            console.error('Error fetching next video:', error);
+        }
+    };
+
+    useEffect(() => {
+        console.log('trigger fetchNextVideo -------------------')
+        fetchNextVideo();
+    }, [video]);
+
+    const handleNextVideo = async () => {
+        console.log('test nextVideo nextVideo.id=', nextVideoRef.current?.id);
+        if (nextVideoRef.current) {
+            onNextVideo(nextVideoRef.current);
+            console.log('清空nextVideo状态')
+            setNextVideo(null); // 清空nextVideo状态
+            nextVideoRef.current = null;
+        } else {
+            // 如果nextVideo还没准备好，直接调用getNextVideo
+            console.log(`如果nextVideo还没准备好，直接调用getNextVideo`)
+            try {
+                const playOrder = await AsyncStorage.getItem('playOrder');
+                const next = await getNextVideo(video.id, video.type, playOrder === 'random');
+                if (next) {
+                    onNextVideo(next);
+                    fetchNextVideo(); // 获取下一个视频
+                } else {
+                    console.log('No next video available');
+                }
+            } catch (error) {
+                console.error('Error getting next video:', error);
+            }
         }
     };
 
@@ -200,6 +252,7 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
     }, [video]);
 
     const onPlaybackStatusUpdate = (status) => {
+        // console.log('before videoRef.current.source==', videoRef.current.source)
         if (status.isLoaded) {
             setIsLoading(false);
             if (!isSeeking) {
@@ -210,8 +263,11 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                 onVideoEnd();
             }
         } else {
-            console.error('Video failed to load:', status.error);
+            // console.log('Video failed to load:', status);
             setIsLoading(false);
+
+            videoRef.current.source = video.video_src + `${video.video_src.indexOf('?') > 0 ? '&' : '?&'}` + Math.random()
+            // console.log('after videoRef.current.source==', videoRef.current.source)
         }
     };
 
@@ -255,14 +311,15 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
             <TouchableWithoutFeedback onPress={togglePlayPause}>
                 <View style={styles.videoContainer}>
                     <Video
+                        key={video.id}
                         ref={videoRef}
-                        source={videoUrl ? { uri: videoUrl } : undefined}
+                        source={video.video_src ? { uri: video.video_src } : undefined}
                         style={styles.video}
                         resizeMode="contain"
                         isLooping={playMode === 'single'}
                         onPlaybackStatusUpdate={onPlaybackStatusUpdate}
                         rate={parseFloat(playSpeed)}
-                        shouldPlay={isPlaying}
+                        shouldPlay={true}
                         useNativeControls={false}
                         onError={(error) => {
                             console.error('Video playback error:', error);
@@ -272,11 +329,18 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                             setIsLoading(false);
                             setShowCover(false);
                         }}
-                        onLoadStart={() => setIsLoading(true)}
+                        onLoadStart={() => {
+                            setIsLoading(true);
+                            // if (!isPlaying) togglePlayPause();
+                        }}
+                        progressUpdateIntervalMillis={500}
+                        positionMillis={0}
+                        shouldCorrectPitch={true}
+                        preload="auto"
                     />
-                    {showCover && (
+                    {/* {showCover && (
                         <Image source={{ uri: video.image_src }} style={styles.cover} />
-                    )}
+                    )} */}
                     {isLoading && (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color="#FFFFFF" />
@@ -293,6 +357,13 @@ export const VideoPlayerPage = ({ video, onClose, onNextVideo }) => {
                             />
                         </View>
                     )}
+                    {/* {nextVideo && (
+                        <Video
+                            source={{ uri: nextVideo.video_src }}
+                            style={{ width: 0, height: 0 }}
+                            preload="auto"
+                        />
+                    )} */}
                 </View>
             </TouchableWithoutFeedback>
             <View style={styles.progressContainer}>

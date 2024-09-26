@@ -46,7 +46,7 @@ function MainScreen() {
     if (selectedVideo) {
         return <VideoPlayerPage
             key={selectedVideo.id}
-            video={selectedVideo}
+            srcVideo={selectedVideo}
             onClose={handleClosePlayer}
             onNextVideo={handleNextVideo}
         />;
