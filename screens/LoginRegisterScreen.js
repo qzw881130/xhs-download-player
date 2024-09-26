@@ -11,7 +11,23 @@ export default function LoginRegisterScreen() {
     const [loading, setLoading] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const navigation = useNavigation();
-    const { supabase } = useSupabase();
+    const { user, supabase } = useSupabase();
+
+    useEffect(() => {
+        const checkAuthStatus = async () => {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (error) {
+                console.error('Error checking auth status:', error);
+                return;
+            }
+            if (session) {
+                navigation.navigate('MyLikes');
+            }
+        };
+
+        checkAuthStatus();
+    }, [navigation, supabase.auth]);
+
 
     useEffect(() => {
         const loadCredentials = async () => {
