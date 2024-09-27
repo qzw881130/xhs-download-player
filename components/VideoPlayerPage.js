@@ -9,6 +9,8 @@ import { Video } from 'expo-av';
 import { ControlPanel } from './ControlPanel';
 import { useNextVideo } from '../hooks/useNextVideo';
 import Slider from '@react-native-community/slider';
+import * as ScreenOrientation from 'expo-screen-orientation';
+import { AppState } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -37,6 +39,7 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
     const [isSeeking, setIsSeeking] = useState(false);
 
     const [video, setVideo] = useState(srcVideo);
+    const [isFullscreen, setIsFullscreen] = useState(false);
 
     const onNextVideo = (nextVideo) => {
         console.log('trigger onNextVideo=====onNextVideo,', nextVideo?.id)
@@ -310,6 +313,50 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
         return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     }
 
+    const togglePictureInPicture = async () => {
+        if (videoRef.current) {
+            try {
+                if (isFullscreen) {
+                    await videoRef.current.dismissFullscreenPlayer();
+                    setIsFullscreen(false);
+                } else {
+                    await videoRef.current.presentFullscreenPlayer();
+                    setIsFullscreen(true);
+                }
+            } catch (error) {
+                console.error('Error toggling fullscreen:', error);
+            }
+        }
+    };
+
+    useEffect(() => {
+        const handleAppStateChange = (nextAppState) => {
+            if (nextAppState === 'background' && isPlaying) {
+                // When app goes to background and video is playing, 
+                // we assume it's in PiP mode
+                setIsFullscreen(true);
+            }
+        };
+
+        const appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
+
+        return () => {
+            appStateSubscription.remove();
+        };
+    }, [isPlaying]);
+
+    useEffect(() => {
+        const setupScreenOrientation = async () => {
+            await ScreenOrientation.unlockAsync();
+        };
+
+        setupScreenOrientation();
+
+        return () => {
+            ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+        };
+    }, []);
+
     return (
         <View style={styles.container}   {...panResponder.panHandlers}>
             <StatusBar style="light" translucent backgroundColor="transparent" />
@@ -342,6 +389,13 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
                         positionMillis={0}
                         shouldCorrectPitch={true}
                         preload="auto"
+                        onFullscreenUpdate={({ fullscreenUpdate }) => {
+                            if (fullscreenUpdate === Video.FULLSCREEN_UPDATE_PLAYER_DID_PRESENT) {
+                                setIsFullscreen(true);
+                            } else if (fullscreenUpdate === Video.FULLSCREEN_UPDATE_PLAYER_DID_DISMISS) {
+                                setIsFullscreen(false);
+                            }
+                        }}
                     />
                     {showCover && (
                         <Image source={{ uri: video.image_src }} style={styles.cover} />
@@ -409,6 +463,11 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
                         <Appbar.BackAction color="white" />
                     </TouchableOpacity>
                     <Appbar.Content title="" />
+                    <Appbar.Action
+                        icon={isFullscreen ? "fullscreen-exit" : "fullscreen"}
+                        onPress={togglePictureInPicture}
+                        color="white"
+                    />
                     <Appbar.Action icon="cog" onPress={handleSettingsPress} color="white" />
                 </Appbar.Header>
             </LinearGradient>
