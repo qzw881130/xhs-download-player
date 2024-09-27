@@ -305,6 +305,11 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
 
+    const capitalizeFirstLetter = (string) => {
+        if (!string) return ''; // 处理空字符串情况
+        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    }
+
     return (
         <View style={styles.container}   {...panResponder.panHandlers}>
             <StatusBar style="light" translucent backgroundColor="transparent" />
@@ -387,6 +392,7 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
                 <View style={styles.titleContainer}>
                     <View style={styles.badgeContainer}>
                         <Text style={styles.badgeText}>ID: {video.id}</Text>
+                        <Text style={[styles.badgeText, { marginLeft: 8 }]}>{capitalizeFirstLetter(video.type)}</Text>
                         <Text style={[styles.badgeText, { marginLeft: 8 }]}>{`倍速 ` + playSpeed}</Text>
                         <Text style={[styles.badgeText, { marginLeft: 8 }]}>{playOrder == 'random' ? '随机播放' : '顺序播放'}</Text>
                         <Text style={[styles.badgeText, { marginLeft: 8 }]}>{playMode == 'single' ? '单循环' : '自动播放一下'}</Text>
