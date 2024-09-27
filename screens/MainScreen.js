@@ -42,7 +42,7 @@ function MainScreen() {
     const renderIcon = ({ route, focused, color }) => {
         return <MaterialCommunityIcons name={route.icon} size={22} color={color} />;
     };
-
+    console.log('selectedVideo===', selectedVideo)
     if (selectedVideo) {
         return <VideoPlayerPage
             key={selectedVideo.id}

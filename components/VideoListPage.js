@@ -34,7 +34,7 @@ export const VideoListPage = ({ title, type, onVideoPress }) => {
     const renderItem = ({ item }) => (
         <TouchableOpacity onPress={() => onVideoPress(item)}>
             <Card style={styles.card}>
-                <Card.Cover source={{ uri: item.image_src }} style={styles.cardImage} />
+                <Card.Cover source={{ uri: item.image_src || 'https://via.placeholder.com/150x200' }} style={styles.cardImage} />
                 <Card.Content>
                     <Text numberOfLines={2} style={styles.cardTitle}>{item.title}</Text>
                 </Card.Content>
