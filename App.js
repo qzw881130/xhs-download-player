@@ -5,6 +5,7 @@ import { Provider as PaperProvider, DefaultTheme } from 'react-native-paper';
 import LoginRegisterScreen from './screens/LoginRegisterScreen';
 import MainScreen from './screens/MainScreen';
 import { SupabaseProvider } from './contexts/SupabaseContext';
+import { Audio } from 'expo-av';
 
 const Stack = createStackNavigator();
 
@@ -24,6 +25,21 @@ const theme = {
 
 export default function App() {
     const navigationRef = useRef();
+
+    useEffect(() => {
+        const setupAudio = async () => {
+            await Audio.setAudioModeAsync({
+                playsInSilentModeIOS: true,
+                staysActiveInBackground: true,
+                interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+                interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DUCK_OTHERS,
+                shouldDuckAndroid: true,
+                playThroughEarpieceAndroid: false,
+            });
+        };
+
+        setupAudio();
+    }, []);
 
     return (
         <SupabaseProvider>

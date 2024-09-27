@@ -19,14 +19,22 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.qianzhiwei5921.XhsDownloadPlayer",
-      "buildNumber": "9"
+      "buildNumber": "10",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio"
+        ]
+      }
     },
     "android": {
       "package": "com.qianzhiwei5921.XhsDownloadPlayer",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "permissions": [
+        "FOREGROUND_SERVICE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -37,6 +45,14 @@
       "eas": {
         "projectId": "346240cd-c217-47e4-aa08-b1976a9a4279"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
+        }
+      ]
+    ]
   }
 }
