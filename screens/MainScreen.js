@@ -5,52 +5,32 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { VideoListPage } from '../components/VideoListPage';
 import { VideoPlayerPage } from '../components/VideoPlayerPage';
 import { AccountPage } from '../components/AccountPage';
+import { createStackNavigator } from '@react-navigation/stack';
 
-function MainScreen() {
+const Stack = createStackNavigator();
+
+function MainContent({ navigation }) {
     const [index, setIndex] = useState(0);
     const [routes] = useState([
         { key: 'liked', title: '点赞', icon: 'thumb-up' },
         { key: 'collected', title: '收藏', icon: 'star' },
-        // { key: 'post', title: '笔记', icon: 'notebook' },
-        // { key: 'about', title: '关于', icon: 'information' },
         { key: 'account', title: '帐号', icon: 'account' },
     ]);
-    const [selectedVideo, setSelectedVideo] = useState(null);
 
     const handleVideoPress = useCallback((item) => {
-        setSelectedVideo(item);
-    }, []);
-
-    const handleClosePlayer = useCallback(() => {
-        console.log('Closing player');
-        setSelectedVideo(null);
-    }, []);
-
-    const handleNextVideo = (video) => {
-        // console.log('next video', video)
-        setSelectedVideo(video);
-    };
+        navigation.navigate('VideoPlayer', { video: item });
+    }, [navigation]);
 
     const renderScene = BottomNavigation.SceneMap({
         liked: () => <VideoListPage title="我的点赞视频" type='liked' onVideoPress={handleVideoPress} />,
         collected: () => <VideoListPage title="我的收藏视频" type='collected' onVideoPress={handleVideoPress} />,
-        post: () => <VideoListPage title="我的笔记视频" type='post' onVideoPress={handleVideoPress} />,
-        // about: () => <VideoListPage title="关于" count={0} data={[]} onVideoPress={handleVideoPress} />,
         account: () => <AccountPage />
     });
 
     const renderIcon = ({ route, focused, color }) => {
         return <MaterialCommunityIcons name={route.icon} size={22} color={color} />;
     };
-    console.log('selectedVideo===', selectedVideo)
-    if (selectedVideo) {
-        return <VideoPlayerPage
-            key={selectedVideo.id}
-            srcVideo={selectedVideo}
-            onClose={handleClosePlayer}
-            onNextVideo={handleNextVideo}
-        />;
-    }
+
     return (
         <BottomNavigation
             navigationState={{ index, routes }}
@@ -65,6 +45,31 @@ function MainScreen() {
     );
 }
 
+function MainScreen() {
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="MainContent" component={MainContent} />
+            <Stack.Screen name="VideoPlayer" component={VideoPlayerScreen} />
+        </Stack.Navigator>
+    );
+}
+
+function VideoPlayerScreen({ route, navigation }) {
+    const { video } = route.params;
+
+    const handleClosePlayer = useCallback(() => {
+        console.log('Closing player');
+        navigation.goBack();
+    }, [navigation]);
+
+    return (
+        <VideoPlayerPage
+            srcVideo={video}
+            onClose={handleClosePlayer}
+        />
+    );
+}
+
 const styles = StyleSheet.create({
     barStyle: {
         marginBottom: Platform.OS === 'ios' ? -35 : -10,
@@ -72,4 +77,5 @@ const styles = StyleSheet.create({
     viewStyle: {
     }
 });
+
 export default MainScreen;
