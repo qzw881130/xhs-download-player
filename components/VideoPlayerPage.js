@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
     content: {
         position: 'absolute',
         padding: 0,
-        bottom: 85,
+        bottom: 95,
         left: 0,
         borderWidth: 0,
         borderColor: 'orange',
@@ -535,7 +535,7 @@ const styles = StyleSheet.create({
     },
     title: {
         color: 'white',
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
     },
     overlay: {
