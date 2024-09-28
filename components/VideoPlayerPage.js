@@ -39,14 +39,12 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
     const [isSeeking, setIsSeeking] = useState(false);
 
     const [video, setVideo] = useState(srcVideo);
-    const [isFullscreen, setIsFullscreen] = useState(false);
 
     const onNextVideo = (nextVideo) => {
         console.log('trigger onNextVideo=====onNextVideo,', nextVideo?.id)
         setVideo(nextVideo);
     }
 
-    const nextVideo2 = nextVideo;
     useEffect(() => {
         nextVideoRef.current = nextVideo; // update the ref whenever nextVideo changes
         console.log('nextVideo====', nextVideoRef.current)
@@ -313,22 +311,6 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
         return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     }
 
-    const togglePictureInPicture = async () => {
-        if (videoRef.current) {
-            try {
-                if (isFullscreen) {
-                    await videoRef.current.dismissFullscreenPlayer();
-                    setIsFullscreen(false);
-                } else {
-                    await videoRef.current.presentFullscreenPlayer();
-                    setIsFullscreen(true);
-                }
-            } catch (error) {
-                console.error('Error toggling fullscreen:', error);
-            }
-        }
-    };
-
     useEffect(() => {
         const handleAppStateChange = (nextAppState) => {
             if (nextAppState === 'background' && isPlaying) {
@@ -389,13 +371,6 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
                         positionMillis={0}
                         shouldCorrectPitch={true}
                         preload="auto"
-                        onFullscreenUpdate={({ fullscreenUpdate }) => {
-                            if (fullscreenUpdate === Video.FULLSCREEN_UPDATE_PLAYER_DID_PRESENT) {
-                                setIsFullscreen(true);
-                            } else if (fullscreenUpdate === Video.FULLSCREEN_UPDATE_PLAYER_DID_DISMISS) {
-                                setIsFullscreen(false);
-                            }
-                        }}
                     />
                     {showCover && (
                         <Image source={{ uri: video.image_src }} style={styles.cover} />
@@ -463,11 +438,6 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
                         <Appbar.BackAction color="white" />
                     </TouchableOpacity>
                     <Appbar.Content title="" />
-                    <Appbar.Action
-                        icon={isFullscreen ? "fullscreen-exit" : "fullscreen"}
-                        onPress={togglePictureInPicture}
-                        color="white"
-                    />
                     <Appbar.Action icon="cog" onPress={handleSettingsPress} color="white" />
                 </Appbar.Header>
             </LinearGradient>

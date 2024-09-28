@@ -74,7 +74,7 @@ export const AccountPage = () => {
                         退出
                     </Button>
                 </View>
-                <View style={styles.statsSection}>
+                {/* <View style={styles.statsSection}>
                     <Card style={styles.card}>
                         <Card.Content style={styles.cardContent}>
                             <Text style={styles.cardTitle}>点赞视频数: </Text>
@@ -87,7 +87,7 @@ export const AccountPage = () => {
                             <Text>{stats.favoritedVideos}</Text>
                         </Card.Content>
                     </Card>
-                </View>
+                </View> */}
             </ScrollView>
         </View>
     );
