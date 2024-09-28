@@ -101,14 +101,21 @@ const styles = StyleSheet.create({
     appbar: {
         elevation: 0,
         backgroundColor: 'transparent',
+        borderWidth: 0,
+        borderColor: 'yellow',
+        marginTop: 30
     },
     appbarContent: {
         alignItems: 'center',
+        borderWidth: 0,
+        borderColor: 'red',
+        padding: 1
     },
     appbarTitle: {
         color: '#000000', // 更深的颜色，可以根据需要调整
         fontWeight: 'bold', // 加粗字体
         fontSize: 26, // 增大字体大小
+        padding: 10
     },
     centerContent: {
         flex: 1,
