@@ -23,6 +23,17 @@
       "infoPlist": {
         "UIBackgroundModes": [
           "audio"
+        ],
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
+        "NSPrivacyCollectedDataTypes": [
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeEmailAddress",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAccountManagement"
+            ]
+          }
         ]
       }
     },
@@ -53,6 +64,7 @@
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
         }
       ]
-    ]
+    ],
+    "privacyPolicyUrl": "https://your-privacy-policy-url.com"
   }
 }

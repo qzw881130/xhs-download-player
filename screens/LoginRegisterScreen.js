@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Text, TextInput, Button, ActivityIndicator, Checkbox, Snackbar } from 'react-native-paper';
@@ -9,7 +9,8 @@ export default function LoginRegisterScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [rememberMe, setRememberMe] = useState(false);
+    const [rememberMe, setRememberMe] = useState(true);
+    const [agreeToPrivacy, setAgreeToPrivacy] = useState(true);
     const navigation = useNavigation();
     const { user, supabase } = useSupabase();
     const [visible, setVisible] = React.useState(false);
@@ -80,6 +81,11 @@ export default function LoginRegisterScreen() {
     };
 
     const handleRegister = async () => {
+        if (!agreeToPrivacy) {
+            setError('请同意隐私政策才能继续');
+            setVisible(true);
+            return;
+        }
         setLoading(true);
         try {
             const { data, error } = await supabase.auth.signUp({ email, password });
@@ -102,6 +108,10 @@ export default function LoginRegisterScreen() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const openPrivacyPolicy = () => {
+        Linking.openURL('https://qzw881130.github.io/files/xhs-download-video/privacy-policy.html');
     };
 
     return (
@@ -134,6 +144,22 @@ export default function LoginRegisterScreen() {
                         记住我
                     </Text>
                 </View>
+                <View style={styles.checkboxContainer}>
+                    <Checkbox
+                        status={agreeToPrivacy ? 'checked' : 'unchecked'}
+                        onPress={() => setAgreeToPrivacy(!agreeToPrivacy)}
+                        style={{ borderWidth: 1, borderColor: 'black' }}
+                    />
+                    <Text
+                        style={styles.label}
+                        onPress={openPrivacyPolicy}
+                    >
+                        我同意 <Text style={styles.link}>隐私政策</Text>
+                    </Text>
+                </View>
+                <Text style={styles.dataUsageInfo}>
+                    我们收集您的邮箱地址用于账户管理和通知目的。您可以随时在账户设置中删除您的数据。
+                </Text>
                 {loading ? (
                     <ActivityIndicator size="large" animating={true} color="#0000ff" />
                 ) : (
@@ -183,5 +209,15 @@ const styles = StyleSheet.create({
     },
     button: {
         marginTop: 10,
+    },
+    link: {
+        color: 'blue',
+        textDecorationLine: 'underline',
+    },
+    dataUsageInfo: {
+        fontSize: 12,
+        color: 'gray',
+        marginBottom: 10,
+        textAlign: 'center',
     },
 });
