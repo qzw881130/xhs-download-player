@@ -252,10 +252,16 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
         console.log('Video changed:', video.title);
     }, [video]);
 
-    const onPlaybackStatusUpdate = (status) => {
+    const onPlaybackStatusUpdate = async (status) => {
         // console.log('before videoRef.current.source==', videoRef.current.source)
         if (status.isLoaded) {
             setIsLoading(false);
+
+            if (!isPlaying) {
+                const status = await videoRef.current.getStatusAsync();
+                if (status.isPlaying) setIsPlaying(true);
+            }
+
             if (!isSeeking) {
                 setProgress(status.positionMillis / status.durationMillis);
             }
@@ -310,34 +316,6 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
         if (!string) return ''; // 处理空字符串情况
         return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     }
-
-    useEffect(() => {
-        const handleAppStateChange = (nextAppState) => {
-            if (nextAppState === 'background' && isPlaying) {
-                // When app goes to background and video is playing, 
-                // we assume it's in PiP mode
-                setIsFullscreen(true);
-            }
-        };
-
-        const appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
-
-        return () => {
-            appStateSubscription.remove();
-        };
-    }, [isPlaying]);
-
-    useEffect(() => {
-        const setupScreenOrientation = async () => {
-            await ScreenOrientation.unlockAsync();
-        };
-
-        setupScreenOrientation();
-
-        return () => {
-            ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-        };
-    }, []);
 
     return (
         <View style={styles.container}   {...panResponder.panHandlers}>
