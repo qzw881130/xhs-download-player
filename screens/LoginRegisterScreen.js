@@ -158,7 +158,7 @@ export default function LoginRegisterScreen() {
                     </Text>
                 </View>
                 <Text style={styles.dataUsageInfo}>
-                    我们收集您的邮箱地址用于账户管理和通知目的。您可以随时在账户设置中删除您的数据。
+                    （我们收集您的邮箱地址用于账户管理和通知目的。）
                 </Text>
                 {loading ? (
                     <ActivityIndicator size="large" animating={true} color="#0000ff" />
@@ -201,11 +201,16 @@ const styles = StyleSheet.create({
     checkboxContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 12,
+        marginBottom: 0,
+        borderWidth: 0,
+        borderColor: 'red'
     },
     label: {
-        margin: 8,
-        color: '#333'
+        margin: 4,
+        color: '#333',
+        fontSize: 12,
+        borderWidth: 0,
+        borderColor: 'green'
     },
     button: {
         marginTop: 10,
@@ -215,9 +220,11 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
     },
     dataUsageInfo: {
-        fontSize: 12,
+        fontSize: 10,
         color: 'gray',
-        marginBottom: 10,
-        textAlign: 'center',
+        marginBottom: 0,
+        marginLeft: 30,
+        borderWidth: 0,
+        borderColor: 'green'
     },
 });
