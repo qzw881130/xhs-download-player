@@ -37,8 +37,13 @@ const SearchModal = ({ visible, onDismiss, onVideoPress, type }) => {
         Keyboard.dismiss(); // 隐藏键盘
     };
 
+    const handlePlay = (item) => {
+        onDismiss();
+        onVideoPress(item)
+    }
+
     const renderItem = ({ item }) => (
-        <TouchableOpacity onPress={() => onVideoPress(item)}>
+        <TouchableOpacity onPress={() => handlePlay(item)}>
             <Card style={styles.card}>
                 <Card.Cover source={{ uri: item.image_src || `https://via.placeholder.com/150x200` }} style={styles.cardImage} />
                 <Card.Content>
