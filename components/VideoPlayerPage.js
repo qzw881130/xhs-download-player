@@ -208,7 +208,7 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
         try {
             const playOrder = await AsyncStorage.getItem('playOrder');
             const next = await getNextVideo(video.id, video.type, playOrder === 'random');
-            console.log('prepare done id=', next.id);
+            console.log('prepare done id=', next?.id);
             setNextVideo(next);
         } catch (error) {
             console.error('Error fetching next video:', error);

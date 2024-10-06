@@ -90,7 +90,7 @@ export const useNextVideo = () => {
 
                 console.log(`Fetched first video:`, firstVideo);
 
-                return firstVideo[0];
+                return firstVideo?.[0];
             }
 
             return null;

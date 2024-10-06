@@ -67,7 +67,7 @@ const downloadVideo = async (url, vid) => {
     try {
         console.log('Starting download from URL:', url);
         const proxyUrl = `https://woouwxrgdkgxobbikbdj.supabase.co/functions/v1/proxyDownload?videoUrl=` + encodeURIComponent(url);
-        console.log('proxyUrl===', proxyUrl)
+        console.log('proxyUrl===', proxyUrl);
 
         const downloadResumable = FileSystem.createDownloadResumable(
             proxyUrl,
@@ -75,27 +75,30 @@ const downloadVideo = async (url, vid) => {
             {},
             (downloadProgress) => {
                 const { totalBytesWritten, totalBytesExpectedToWrite } = downloadProgress;
+                console.log(`Bytes written: ${totalBytesWritten}, Expected: ${totalBytesExpectedToWrite}`);
                 if (totalBytesExpectedToWrite > 0) {
                     const progress = (totalBytesWritten / totalBytesExpectedToWrite) * 100;
                     console.log(`Download progress: ${progress.toFixed(2)}%`);
-                } else {
-                    console.log(`Bytes written: ${totalBytesWritten}, Expected: ${totalBytesExpectedToWrite}`);
                 }
             }
         );
 
-        const { uri } = await downloadResumable.downloadAsync();
-        const fileInfo = await FileSystem.getInfoAsync(uri);
-        const fileSizeInBytes = fileInfo.size;
-        const fileSizeInMB = (fileSizeInBytes / (1024 * 1024)).toFixed(2);
-        console.log('Video downloaded to:', uri, 'target=', url, 'size==', `${fileSizeInMB} MB`);
+        const result = await downloadResumable.downloadAsync();
+        if (result && result.uri) {
+            const fileInfo = await FileSystem.getInfoAsync(result.uri);
+            const fileSizeInBytes = fileInfo.size;
+            const fileSizeInMB = (fileSizeInBytes / (1024 * 1024)).toFixed(2);
+            console.log('Video downloaded to:', result.uri, 'target=', url, 'size==', `${fileSizeInMB} MB`);
 
-        if (fileSizeInBytes === 0) {
-            throw new Error('Downloaded file is empty');
+            if (fileSizeInBytes === 0) {
+                throw new Error('Downloaded file is empty');
+            }
+
+            await AsyncStorage.setItem(`video_${vid}`, result.uri);
+            return result.uri;
+        } else {
+            throw new Error('Download failed: No URI returned');
         }
-
-        await AsyncStorage.setItem(`video_${vid}`, uri);
-        return uri;
     } catch (error) {
         console.error('Error downloading video:', error);
         if (error.message.includes('403')) {
@@ -105,8 +108,13 @@ const downloadVideo = async (url, vid) => {
         }
         // Attempt to read file content for more information
         try {
-            const fileContent = await FileSystem.readAsStringAsync(fileUri);
-            console.log('File content:', fileContent.substring(0, 1000)); // Print first 1000 characters
+            const fileInfo = await FileSystem.getInfoAsync(fileUri);
+            if (fileInfo.exists) {
+                const fileContent = await FileSystem.readAsStringAsync(fileUri);
+                console.log('File content:', fileContent.substring(0, 1000)); // Print first 1000 characters
+            } else {
+                console.log('File does not exist after download attempt');
+            }
         } catch (readError) {
             console.error('Error reading file:', readError);
         }
