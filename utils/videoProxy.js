@@ -155,3 +155,38 @@ export const handleVideoLoadError = async (vid, remoteUrl) => {
     console.log('Download failed, returning remote URL:', remoteUrl);
     return remoteUrl; // 如果下载失败，返回远程 URL
 };
+
+// 新增：计算缓存大小
+export const getCacheSize = async () => {
+    try {
+        const result = await FileSystem.getInfoAsync(VIDEOS_DIRECTORY);
+        if (result.exists && result.isDirectory) {
+            const contents = await FileSystem.readDirectoryAsync(VIDEOS_DIRECTORY);
+            let totalSize = 0;
+            for (const item of contents) {
+                const fileInfo = await FileSystem.getInfoAsync(VIDEOS_DIRECTORY + item);
+                if (fileInfo.exists && !fileInfo.isDirectory) {
+                    totalSize += fileInfo.size;
+                }
+            }
+            return (totalSize / (1024 * 1024)).toFixed(2); // 返回 MB，保留两位小数
+        }
+        return '0';
+    } catch (error) {
+        console.error('Error calculating cache size:', error);
+        return '0';
+    }
+};
+
+// 新增：清除缓存
+export const clearCache = async () => {
+    try {
+        await FileSystem.deleteAsync(VIDEOS_DIRECTORY, { idempotent: true });
+        await FileSystem.makeDirectoryAsync(VIDEOS_DIRECTORY, { intermediates: true });
+        await AsyncStorage.clear(); // 清除所有存储的视频 URI
+        return true;
+    } catch (error) {
+        console.error('Error clearing cache:', error);
+        return false;
+    }
+};

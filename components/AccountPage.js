@@ -1,19 +1,28 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, SafeAreaView, ScrollView, Alert } from 'react-native';
 import { Text, Card, Button, ActivityIndicator, Appbar } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSupabase } from '../contexts/SupabaseContext';
 import { useUserStats } from '../hooks/useUserStats';
 import { useNavigation } from '@react-navigation/native';
+import { getCacheSize, clearCache } from '../utils/videoProxy';
 
 export const AccountPage = () => {
     const { user, supabase } = useSupabase();
     const { stats, loading, error, refetchStats } = useUserStats();
     const navigation = useNavigation();
+    const [cacheSize, setCacheSize] = useState('0');
+    const [clearingCache, setClearingCache] = useState(false);
 
     useEffect(() => {
         console.log('AccountPage: Current user:', user);
+        loadCacheSize();
     }, [user]);
+
+    const loadCacheSize = async () => {
+        const size = await getCacheSize();
+        setCacheSize(size);
+    };
 
     const handleLogout = async () => {
         try {
@@ -26,6 +35,33 @@ export const AccountPage = () => {
         } catch (error) {
             console.error('Logout error:', error);
         }
+    };
+
+    const handleClearCache = async () => {
+        Alert.alert(
+            "清除缓存",
+            "确定要清除所有缓存的视频吗？",
+            [
+                {
+                    text: "取消",
+                    style: "cancel"
+                },
+                {
+                    text: "确定",
+                    onPress: async () => {
+                        setClearingCache(true);
+                        const success = await clearCache();
+                        if (success) {
+                            await loadCacheSize();
+                            Alert.alert("成功", "缓存已清除");
+                        } else {
+                            Alert.alert("错误", "清除缓存时出现问题");
+                        }
+                        setClearingCache(false);
+                    }
+                }
+            ]
+        );
     };
 
     const renderAppBar = () => (
@@ -72,6 +108,22 @@ export const AccountPage = () => {
                     <Text style={styles.email}>{user?.email}</Text>
                     <Button mode="contained" onPress={handleLogout} style={styles.button}>
                         退出
+                    </Button>
+                </View>
+                <View style={styles.cacheSection}>
+                    <Card style={styles.card}>
+                        <Card.Content style={styles.cardContent}>
+                            <Text style={styles.cardTitle}>缓存大小: </Text>
+                            <Text>{cacheSize} MB</Text>
+                        </Card.Content>
+                    </Card>
+                    <Button
+                        mode="outlined"
+                        onPress={handleClearCache}
+                        style={styles.button}
+                        disabled={clearingCache}
+                    >
+                        {clearingCache ? "正在清除..." : "清除缓存"}
                     </Button>
                 </View>
                 {/* <View style={styles.statsSection}>
@@ -152,5 +204,26 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    cacheSection: {
+        marginTop: 16,
+        alignItems: 'center',
+    },
+    card: {
+        width: '100%',
+        marginBottom: 12,
+    },
+    cardContent: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    cardTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    button: {
+        marginTop: 8,
+        width: '100%',
     },
 });
