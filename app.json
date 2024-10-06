@@ -19,7 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.qianzhiwei5921.XhsDownloadPlayer",
-      "buildNumber": "15",
+      "buildNumber": "16",
       "infoPlist": {
         "UIBackgroundModes": [
           "audio"
@@ -65,6 +65,6 @@
         }
       ]
     ],
-    "privacyPolicyUrl": "https://your-privacy-policy-url.com"
+    "privacyPolicyUrl": "https://qzw881130.github.io/files/xhs-download-video/privacy-policy.html"
   }
 }

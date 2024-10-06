@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, FlatList, TouchableOpacity, Dimensions, Keyboard } from 'react-native';
-import { Modal, Portal, Searchbar, IconButton, Text, Card, Button, Menu, ActivityIndicator } from 'react-native-paper';
+import React, { useState, useRef, useCallback } from 'react';
+import { StyleSheet, View, FlatList, TouchableOpacity, Dimensions, Keyboard, TextInput } from 'react-native';
+import { Modal, Portal, IconButton, Text, Card, Button, Menu, ActivityIndicator } from 'react-native-paper';
 import { useFilteredVideoList } from '../hooks/useFilteredVideoList';
 
 const { width } = Dimensions.get('window');
@@ -10,6 +10,7 @@ const SearchModal = ({ visible, onDismiss, onVideoPress, type }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [menuVisible, setMenuVisible] = useState(false);
     const itemsPerPage = 10;
+    const searchInputRef = useRef(null);
 
     const {
         filteredData,
@@ -27,15 +28,16 @@ const SearchModal = ({ visible, onDismiss, onVideoPress, type }) => {
         setPage
     } = useFilteredVideoList({ type, pageSize: itemsPerPage });
 
-    const onChangeSearch = query => {
+    const onChangeSearch = (query) => {
         setSearchQuery(query);
-        // search(query);
     };
 
-    const handleSearch = () => {
-        search(searchQuery);
-        Keyboard.dismiss(); // 隐藏键盘
-    };
+    const handleSearch = useCallback(() => {
+        if (searchQuery.trim()) {
+            search(searchQuery.trim());
+        }
+        Keyboard.dismiss();
+    }, [searchQuery, search]);
 
     const handlePlay = (item) => {
         onDismiss();
@@ -71,15 +73,17 @@ const SearchModal = ({ visible, onDismiss, onVideoPress, type }) => {
                         onPress={onDismiss}
                         style={styles.backIcon}
                     />
-                    <Searchbar
-                        placeholder=""
-                        onChangeText={onChangeSearch}
-                        value={searchQuery}
-                        style={styles.searchbar}
-                        inputStyle={styles.searchbarInput}
-                        contentStyle={styles.searchbarContent}
-                        onSubmitEditing={handleSearch}
-                    />
+                    <View style={styles.searchbar}>
+                        <TextInput
+                            ref={searchInputRef}
+                            placeholder="输入搜索内容"
+                            onChangeText={onChangeSearch}
+                            value={searchQuery}
+                            style={styles.searchbarInput}
+                            onEndEditing={handleSearch}
+                            returnKeyType="search"
+                        />
+                    </View>
                     <Button onPress={handleSearch} labelStyle={styles.searchBtn}>搜索</Button>
                 </View>
                 <Text style={styles.resultCount}>共找到 {count} 个结果</Text>
@@ -163,19 +167,16 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         height: 40,
-    },
-    searchBtn: {
-        fontSize: 18,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 20,
+        paddingHorizontal: 10,
     },
     searchbarInput: {
         fontSize: 16,
-        paddingVertical: 0,
-        // backgroundColor: 'red',
-        textAlignVertical: 'center',
-        marginTop: -5
+        height: '100%',
     },
-    searchbarContent: {
-        justifyContent: 'center', // 添加这行确保文本居中
+    searchBtn: {
+        fontSize: 18,
     },
     resultCount: {
         paddingHorizontal: 16,

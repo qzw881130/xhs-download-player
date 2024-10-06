@@ -58,7 +58,9 @@ export const useNextVideo = () => {
                     .eq('type', type)
                     .neq('id', video_id)
                     .order('id', { ascending: false })
-                    .range(randomOffset, randomOffset);
+                    // .eq('id', 2831)
+                    .range(randomOffset, randomOffset)
+                    ;
 
                 if (error) {
                     console.error('Error fetching random video:', error);

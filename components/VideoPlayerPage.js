@@ -325,7 +325,9 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
                     <Video
                         key={video.id}
                         ref={videoRef}
-                        source={video.video_src ? { uri: video.video_src } : undefined}
+                        source={video.video_src ? {
+                            uri: video.video_src
+                        } : undefined}
                         style={styles.video}
                         resizeMode="contain"
                         isLooping={playMode === 'single'}
