@@ -5,6 +5,7 @@ import { Provider as PaperProvider, DefaultTheme } from 'react-native-paper';
 import LoginRegisterScreen from './screens/LoginRegisterScreen';
 import MainScreen from './screens/MainScreen';
 import { SupabaseProvider } from './contexts/SupabaseContext';
+import * as MediaLibrary from 'expo-media-library';
 
 const Stack = createStackNavigator();
 
@@ -24,6 +25,15 @@ const theme = {
 
 export default function App() {
     const navigationRef = useRef();
+
+    useEffect(() => {
+        (async () => {
+            const { status } = await MediaLibrary.requestPermissionsAsync();
+            if (status !== 'granted') {
+                console.log('Permission to access media library was denied');
+            }
+        })();
+    }, []);
 
     return (
         <SupabaseProvider>

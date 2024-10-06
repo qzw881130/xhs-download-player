@@ -11,6 +11,7 @@ import { useNextVideo } from '../hooks/useNextVideo';
 import Slider from '@react-native-community/slider';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { AppState } from 'react-native';
+import { handleVideoLoadError } from '../utils/videoProxy';
 
 const { width, height } = Dimensions.get('window');
 
@@ -101,9 +102,13 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
         })
     ).current;
 
-    const handleBackPress = () => {
+    const handleBackPress = async () => {
         console.log('Back button pressed in VideoPlayerPage');
         if (onClose) {
+            if (videoRef.current) {
+                console.log('pause.....')
+                await videoRef.current?.pauseAsync();
+            }
             onClose();
         } else {
             console.log('onClose is not defined');
@@ -273,7 +278,7 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
             // console.log('Video failed to load:', status);
             setIsLoading(false);
 
-            videoRef.current.source = video.video_src + `${video.video_src.indexOf('?') > 0 ? '&' : '?&'}` + Math.random()
+            // videoRef.current.source = video.video_src + `${video.video_src.indexOf('?') > 0 ? '&' : '?&'}` + Math.random()
             // console.log('after videoRef.current.source==', videoRef.current.source)
         }
     };
@@ -285,6 +290,32 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
             await videoRef.current.setPositionAsync(newPosition);
             setProgress(value);
             setIsSeeking(false);
+        }
+    };
+
+    const handleError = async (error) => {
+        console.log('Video playback error:', error);
+        setIsLoading(true);
+        try {
+            const videoSrc = await handleVideoLoadError(video.vid, video.video_src);
+            console.log('handle error videoSrc=', videoSrc);
+            if (videoSrc !== video.video_src) {
+                // 如果返回了新的 URL（本地文件），则使用它
+                if (videoRef.current) {
+                    await videoRef.current.unloadAsync();
+                    await videoRef.current.loadAsync({ uri: videoSrc }, {}, false);
+                    setIsPlaying(true);
+                    await videoRef.current.playAsync()
+                }
+            } else {
+                // 如果返回的还是原始 URL，说明下载失败，显示错误消息
+                setShowTip(true);
+            }
+        } catch (downloadError) {
+            console.log('Error handling video load failure:', downloadError);
+            setShowTip(true);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -317,6 +348,18 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
         return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     }
 
+    useEffect(() => {
+        return () => {
+            const pauseNextVideo = async () => {
+                if (videoRef.current) {
+                    console.log('pause.....')
+                    await videoRef.current?.pauseAsync();
+                }
+            };
+            pauseNextVideo();
+        };
+    }, [])
+
     return (
         <View style={styles.container}   {...panResponder.panHandlers}>
             <StatusBar style="light" translucent backgroundColor="transparent" />
@@ -335,10 +378,7 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
                         rate={parseFloat(playSpeed)}
                         shouldPlay={true}
                         useNativeControls={false}
-                        onError={(error) => {
-                            console.error('Video playback error:', error);
-                            setIsLoading(false);
-                        }}
+                        onError={handleError}
                         onLoad={() => {
                             setIsLoading(false);
                             setShowCover(false);
