@@ -51,12 +51,17 @@ const checkFileSystemAccess = async () => {
 };
 
 // 下载视频
-const downloadVideo = async (url, vid) => {
+const downloadVideo = async (url, vid, onProgress) => {
     await ensureDirectoryExists();
 
     if (!(await checkFileSystemAccess())) {
         console.warn('File system access check failed, but proceeding with download attempt');
     }
+
+    // Add a 200 second delay before starting the download
+    // console.log('Delaying download for 200 seconds...');
+    // await new Promise(resolve => setTimeout(resolve, 200000));
+    // console.log('Delay complete. Starting download...');
 
     const fileName = `${vid}.mp4`;
     const fileUri = VIDEOS_DIRECTORY + fileName;
@@ -69,6 +74,9 @@ const downloadVideo = async (url, vid) => {
         const proxyUrl = `https://woouwxrgdkgxobbikbdj.supabase.co/functions/v1/proxyDownload?videoUrl=` + encodeURIComponent(url);
         console.log('proxyUrl===', proxyUrl);
 
+        let totalBytes = 0;
+        let lastReportedProgress = 0;
+
         const downloadResumable = FileSystem.createDownloadResumable(
             proxyUrl,
             fileUri,
@@ -76,9 +84,25 @@ const downloadVideo = async (url, vid) => {
             (downloadProgress) => {
                 const { totalBytesWritten, totalBytesExpectedToWrite } = downloadProgress;
                 console.log(`Bytes written: ${totalBytesWritten}, Expected: ${totalBytesExpectedToWrite}`);
+
+                totalBytes = Math.max(totalBytes, totalBytesWritten);
+
                 if (totalBytesExpectedToWrite > 0) {
                     const progress = (totalBytesWritten / totalBytesExpectedToWrite) * 100;
                     console.log(`Download progress: ${progress.toFixed(2)}%`);
+                    if (onProgress) {
+                        onProgress(progress);
+                    }
+                } else {
+                    // 当 totalBytesExpectedToWrite 为 -1 时，我们使用一个估计的进度
+                    const estimatedProgress = (totalBytesWritten / (totalBytes + 1000000)) * 100;
+                    if (estimatedProgress - lastReportedProgress >= 1 || estimatedProgress >= 100) {
+                        console.log(`Estimated download progress: ${estimatedProgress.toFixed(2)}%`);
+                        if (onProgress) {
+                            onProgress(Math.min(estimatedProgress, 100));
+                        }
+                        lastReportedProgress = estimatedProgress;
+                    }
                 }
             }
         );
@@ -138,7 +162,7 @@ export const getVideoUrl = async (vid, remoteUrl) => {
 };
 
 // 处理视频加载失败
-export const handleVideoLoadError = async (vid, remoteUrl) => {
+export const handleVideoLoadError = async (vid, remoteUrl, onProgress) => {
     console.log('Video load failed, attempting to download:', remoteUrl);
     // 删除可能存在的损坏文件
     const fileUri = VIDEOS_DIRECTORY + `${vid}.mp4`;
@@ -154,7 +178,7 @@ export const handleVideoLoadError = async (vid, remoteUrl) => {
     await FileSystem.deleteAsync(fileUri, { idempotent: true });
     await AsyncStorage.removeItem(`video_${vid}`);
 
-    const localUri = await downloadVideo(remoteUrl, vid);
+    const localUri = await downloadVideo(remoteUrl, vid, onProgress);
     if (localUri) {
         const fileInfo = await FileSystem.getInfoAsync(localUri);
         console.log('Downloaded file info:', fileInfo);
@@ -191,7 +215,6 @@ export const clearCache = async () => {
     try {
         await FileSystem.deleteAsync(VIDEOS_DIRECTORY, { idempotent: true });
         await FileSystem.makeDirectoryAsync(VIDEOS_DIRECTORY, { intermediates: true });
-        await AsyncStorage.clear(); // 清除所有存储的视频 URI
         return true;
     } catch (error) {
         console.error('Error clearing cache:', error);

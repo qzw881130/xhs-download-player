@@ -40,6 +40,7 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
     const [isSeeking, setIsSeeking] = useState(false);
 
     const [video, setVideo] = useState(srcVideo);
+    const [downloadProgress, setDownloadProgress] = useState(0);
 
     const onNextVideo = (nextVideo) => {
         console.log('trigger onNextVideo=====onNextVideo,', nextVideo?.id)
@@ -276,8 +277,6 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
             }
         } else {
             // console.log('Video failed to load:', status);
-            setIsLoading(false);
-
             // videoRef.current.source = video.video_src + `${video.video_src.indexOf('?') > 0 ? '&' : '?&'}` + Math.random()
             // console.log('after videoRef.current.source==', videoRef.current.source)
         }
@@ -296,8 +295,15 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
     const handleError = async (error) => {
         console.log('Video playback error:', error);
         setIsLoading(true);
+        setDownloadProgress(0);
         try {
-            const videoSrc = await handleVideoLoadError(video.vid, video.video_src);
+            const videoSrc = await handleVideoLoadError(
+                video.vid,
+                video.video_src,
+                (progress) => {
+                    setDownloadProgress(progress);
+                }
+            );
             console.log('handle error videoSrc=', videoSrc);
             if (videoSrc !== video.video_src) {
                 // 如果返回了新的 URL（本地文件），则使用它
@@ -316,6 +322,7 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
             setShowTip(true);
         } finally {
             setIsLoading(false);
+            setDownloadProgress(0);
         }
     };
 
@@ -398,6 +405,11 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
                     {isLoading && (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color="#FFFFFF" />
+                            {downloadProgress >= 0 && (
+                                <Text style={styles.downloadProgressText}>
+                                    缓存本地进度: {downloadProgress.toFixed(2)}%
+                                </Text>
+                            )}
                         </View>
                     )}
                     {!isLoading && !isPlaying && (
@@ -634,5 +646,10 @@ const styles = StyleSheet.create({
     timeText: {
         color: '#FFFFFF',
         fontSize: 12,
+    },
+    downloadProgressText: {
+        color: 'white',
+        fontSize: 16,
+        marginTop: 10,
     },
 });

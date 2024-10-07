@@ -56,10 +56,10 @@ export const useNextVideo = () => {
                     .eq('user_id', user.id)
                     .eq('is_hidden', false)
                     .eq('type', type)
-                    .neq('id', video_id)
+                    // .neq('id', video_id)
                     .order('id', { ascending: false })
-                    // .eq('id', 2831)
-                    .range(randomOffset, randomOffset)
+                    .eq('id', 2831)
+                    // .range(randomOffset, randomOffset)
                     ;
 
                 if (error) {
