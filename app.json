@@ -19,7 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.qianzhiwei5921.XhsDownloadPlayer",
-      "buildNumber": "16",
+      "buildNumber": "23",
       "infoPlist": {
         "UIBackgroundModes": [
           "audio"

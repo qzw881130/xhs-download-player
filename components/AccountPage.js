@@ -6,6 +6,7 @@ import { useSupabase } from '../contexts/SupabaseContext';
 import { useUserStats } from '../hooks/useUserStats';
 import { useNavigation } from '@react-navigation/native';
 import { getCacheSize, clearCache } from '../utils/videoProxy';
+import Constants from 'expo-constants';
 
 export const AccountPage = () => {
     const { user, supabase } = useSupabase();
@@ -141,6 +142,11 @@ export const AccountPage = () => {
                     </Card>
                 </View> */}
             </ScrollView>
+            <View style={styles.versionContainer}>
+                <Text style={styles.versionText}>
+                    版本 {Constants.expoConfig?.version || Constants.manifest?.version || 'Unknown'} (构建 {Constants.expoConfig?.ios?.buildNumber || Constants.expoConfig?.android?.versionCode || Constants.manifest?.ios?.buildNumber || Constants.manifest?.android?.versionCode || 'Unknown'})
+                </Text>
+            </View>
         </View>
     );
 };
@@ -225,5 +231,13 @@ const styles = StyleSheet.create({
     button: {
         marginTop: 8,
         width: '100%',
+    },
+    versionContainer: {
+        padding: 16,
+        alignItems: 'center',
+    },
+    versionText: {
+        fontSize: 14,
+        color: '#888',
     },
 });
