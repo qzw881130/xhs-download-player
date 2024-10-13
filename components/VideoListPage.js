@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { Appbar, Text, Card, Button, Menu, ActivityIndicator } from 'react-native-paper';
 import SearchModal from './SearchModal';
@@ -27,9 +27,7 @@ export const VideoListPage = ({ title, type, onVideoPress }) => {
         setPage
     } = useFilteredVideoList({ type, pageSize: itemsPerPage });
 
-    console.log('count,pageSize,pages,page====', count, pageSize, pages, page)
-
-    const onChangeSearch = query => setSearchQuery(query);
+    console.log('count,pageSize,pages,page====', count, pageSize, pages, page);
 
     const renderItem = ({ item }) => (
         <TouchableOpacity onPress={() => onVideoPress(item)}>
@@ -47,14 +45,16 @@ export const VideoListPage = ({ title, type, onVideoPress }) => {
     const pageOptions = Array.from({ length: pages }, (_, i) => i + 1);
 
     const handleSearch = (query) => {
-        // const filtered = data.filter(item =>
-        //     item.title.toLowerCase().includes(query.toLowerCase())
-        // );
-        // setFilteredData(filtered);
-        // setPage(1);
+        search(query);
     };
 
-    if (loading) {
+    const handleLoadMore = () => {
+        if (hasMore) {
+            loadMore();
+        }
+    };
+
+    if (loading && page === 1) {
         return (
             <View style={styles.container}>
                 <Appbar.Header>
@@ -73,18 +73,23 @@ export const VideoListPage = ({ title, type, onVideoPress }) => {
                 <Appbar.Action icon="magnify" onPress={() => setSearchVisible(true)} />
             </Appbar.Header>
             <FlatList
-                data={filteredData.slice((page - 1) * pageSize, page * pageSize)}
+                data={filteredData}
                 renderItem={renderItem}
                 keyExtractor={item => item.id}
                 numColumns={2}
                 columnWrapperStyle={styles.row}
                 ListEmptyComponent={<Text style={styles.emptyText}>暂无数据</Text>}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.1}
+                ListFooterComponent={() => (
+                    loading && page > 1 ? <ActivityIndicator size="small" /> : null
+                )}
             />
-            {pages > 1 && (
+            {/* {pages > 1 && (
                 <View style={styles.pagination}>
                     <Button
                         onPress={() => setPage(p => Math.max(1, p - 1))}
-                        disabled={page === 1}
+                        disabled={page === 1 || loading}
                     >
                         上一页
                     </Button>
@@ -92,7 +97,7 @@ export const VideoListPage = ({ title, type, onVideoPress }) => {
                         visible={menuVisible}
                         onDismiss={closeMenu}
                         anchor={
-                            <Button onPress={openMenu}>
+                            <Button onPress={openMenu} disabled={loading}>
                                 {`第 ${page} 页`}
                             </Button>
                         }
@@ -110,17 +115,18 @@ export const VideoListPage = ({ title, type, onVideoPress }) => {
                     </Menu>
                     <Button
                         onPress={() => setPage(p => Math.min(pages, p + 1))}
-                        disabled={page === pages}
+                        disabled={page === pages || loading}
                     >
                         下一页
                     </Button>
                 </View>
-            )}
+            )} */}
             <SearchModal
                 visible={searchVisible}
                 onDismiss={() => setSearchVisible(false)}
                 onVideoPress={onVideoPress}
-                type={type}  // 添加这一行，传入当前页面的类型
+                type={type}
+                onSearch={handleSearch}
             />
         </View>
     );

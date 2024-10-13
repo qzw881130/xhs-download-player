@@ -55,9 +55,20 @@ const SearchModal = ({ visible, onDismiss, onVideoPress, type }) => {
         </TouchableOpacity>
     );
 
-    const openMenu = () => setMenuVisible(true);
-    const closeMenu = () => setMenuVisible(false);
-    const pageOptions = Array.from({ length: pages }, (_, i) => i + 1);
+    const handleLoadMore = () => {
+        if (hasMore && !loading) {
+            loadMore();
+        }
+    };
+
+    const renderFooter = () => {
+        if (!loading) return null;
+        return (
+            <View style={styles.footerLoader}>
+                <ActivityIndicator size="small" color="#0000ff" />
+            </View>
+        );
+    };
 
     return (
         <Portal>
@@ -95,47 +106,12 @@ const SearchModal = ({ visible, onDismiss, onVideoPress, type }) => {
                     columnWrapperStyle={styles.row}
                     contentContainerStyle={styles.listContent}
                     ListEmptyComponent={<Text style={styles.emptyText}>暂无数据</Text>}
-                    onEndReached={loadMore}
+                    onEndReached={handleLoadMore}
                     onEndReachedThreshold={0.1}
-                    refreshing={loading}
+                    ListFooterComponent={renderFooter}
+                    refreshing={loading && page === 1}
                     onRefresh={refresh}
                 />
-                {pages > 1 && (
-                    <View style={styles.pagination}>
-                        <Button
-                            onPress={() => setPage(p => Math.max(1, p - 1))}
-                            disabled={page === 1}
-                        >
-                            上一页
-                        </Button>
-                        <Menu
-                            visible={menuVisible}
-                            onDismiss={closeMenu}
-                            anchor={
-                                <Button onPress={openMenu}>
-                                    {`第 ${page} 页`}
-                                </Button>
-                            }
-                        >
-                            {pageOptions.map((p) => (
-                                <Menu.Item
-                                    key={p}
-                                    onPress={() => {
-                                        setPage(p);
-                                        closeMenu();
-                                    }}
-                                    title={`第 ${p} 页`}
-                                />
-                            ))}
-                        </Menu>
-                        <Button
-                            onPress={() => setPage(p => Math.min(pages, p + 1))}
-                            disabled={page === pages}
-                        >
-                            下一页
-                        </Button>
-                    </View>
-                )}
             </Modal>
         </Portal>
     );
@@ -217,6 +193,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    footerLoader: {
+        marginTop: 10,
+        alignItems: 'center'
+    }
 });
 
 export default SearchModal;

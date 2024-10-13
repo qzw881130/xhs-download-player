@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { View, StyleSheet, Dimensions, Image, TouchableOpacity, PanResponder, TouchableWithoutFeedback, Animated, ActivityIndicator, Platform } from 'react-native';
-import { Appbar, IconButton, Text, Snackbar } from 'react-native-paper';
+import { View, StyleSheet, Dimensions, Image, TouchableOpacity, PanResponder, TouchableWithoutFeedback, Animated, ActivityIndicator, Platform, Alert } from 'react-native';
+import { Appbar, IconButton, Text, Snackbar, Dialog, Portal, Button } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,6 +12,7 @@ import Slider from '@react-native-community/slider';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { AppState } from 'react-native';
 import { handleVideoLoadError } from '../utils/videoProxy';
+import { useVideoOperations } from '../hooks/useVideoOperations';
 
 const { width, height } = Dimensions.get('window');
 
@@ -41,6 +42,9 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
 
     const [video, setVideo] = useState(srcVideo);
     const [downloadProgress, setDownloadProgress] = useState(0);
+
+    const [hideDialogVisible, setHideDialogVisible] = useState(false);
+    const { hideVideo } = useVideoOperations();
 
     const onNextVideo = (nextVideo) => {
         console.log('trigger onNextVideo=====onNextVideo,', nextVideo?.id)
@@ -367,6 +371,22 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
         };
     }, [])
 
+    const handleHidePress = () => {
+        setHideDialogVisible(true);
+    };
+
+    const handleHideConfirm = async () => {
+        const success = await hideVideo(video.vid);
+        if (success) {
+            // 可以在这里添加一些用户反馈，比如显示一个 Snackbar
+            setHideDialogVisible(false);
+            // 可能还需要在这里调用 onClose 或 handleNextVideo
+        } else {
+            // 显示错误信息给用户
+            Alert.alert('错误', '隐藏视频失败，请稍后再试。');
+        }
+    };
+
     return (
         <View style={styles.container}   {...panResponder.panHandlers}>
             <StatusBar style="light" translucent backgroundColor="transparent" />
@@ -470,6 +490,7 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
                         <Appbar.BackAction color="white" />
                     </TouchableOpacity>
                     <Appbar.Content title="" />
+                    <Appbar.Action icon="eye-off" onPress={handleHidePress} color="white" />
                     <Appbar.Action icon="cog" onPress={handleSettingsPress} color="white" />
                 </Appbar.Header>
             </LinearGradient>
@@ -502,6 +523,18 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
             >
                 上滑可观看下一个视频
             </Snackbar>
+            <Portal>
+                <Dialog visible={hideDialogVisible} onDismiss={() => setHideDialogVisible(false)}>
+                    <Dialog.Title>确认隐藏</Dialog.Title>
+                    <Dialog.Content>
+                        <Text>是否确定永远隐藏该视频？</Text>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button onPress={() => setHideDialogVisible(false)}>放弃</Button>
+                        <Button onPress={handleHideConfirm}>是</Button>
+                    </Dialog.Actions>
+                </Dialog>
+            </Portal>
         </View>
     );
 };

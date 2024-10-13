@@ -12,7 +12,7 @@ export const useFilteredVideoList = ({ type, initialPage = 1, pageSize = 10 }) =
     const [keyword, setKeyword] = useState('');
     const [count, setCount] = useState(0);
 
-    const fetchFilteredVideos = useCallback(async () => {
+    const fetchFilteredVideos = useCallback(async (currentPage = page) => {
         if (!user) {
             console.log('No user found, aborting fetch');
             setLoading(false);
@@ -23,17 +23,18 @@ export const useFilteredVideoList = ({ type, initialPage = 1, pageSize = 10 }) =
         setError(null);
 
         try {
-            console.log(`Fetching videos for user: ${user.id}, type: ${type}`);
+            console.log(`Fetching videos for user: ${user.id}, type: ${type}, page: ${currentPage}, pageSize: ${pageSize}`);
 
             let query = supabase
                 .from('videos')
-                .select('id, vid,title, video_src, image_src, is_hidden, type', { count: 'exact' })
+                .select('id, vid, title, video_src, image_src, is_hidden, type', { count: 'exact' })
                 .eq('user_id', user.id)
                 .eq('is_hidden', false)
                 .eq('type', type)
-                .not('video_src', 'is', null)  // 确保 video_src 不为 null
-                .not('video_src', 'eq', '')    // 确保 video_src 不为空字符串
-                .order('created_at', { ascending: false });
+                .not('video_src', 'is', null)
+                .not('video_src', 'eq', '')
+                .order('created_at', { ascending: false })
+                .range((currentPage - 1) * pageSize, currentPage * pageSize - 1);
 
             if (keyword) {
                 query = query.ilike('title', `%${keyword}%`);
@@ -41,13 +42,13 @@ export const useFilteredVideoList = ({ type, initialPage = 1, pageSize = 10 }) =
 
             const { data, error, count: totalCount } = await query;
 
+            console.log('page==', currentPage, 'range===', (currentPage - 1) * pageSize, currentPage * pageSize - 1, 'data.length=', data.length)
             if (error) {
                 console.error('Error fetching videos:', error);
                 throw error;
             }
 
             console.log('Total count:', totalCount);
-            // console.log('Fetched data:', data);
 
             if (totalCount === null) {
                 console.warn('Total count is null, this might indicate an issue with the query or permissions');
@@ -58,12 +59,8 @@ export const useFilteredVideoList = ({ type, initialPage = 1, pageSize = 10 }) =
                 setPages(Math.ceil(totalCount / pageSize));
             }
 
-            const currentPage = page;
-            const startIndex = (currentPage - 1) * pageSize;
-            const endIndex = startIndex + pageSize;
-
-            setFilteredData(data);
-            setHasMore(endIndex < totalCount);
+            setFilteredData(prevData => currentPage === 1 ? data : [...prevData, ...data]);
+            setHasMore(currentPage * pageSize < totalCount);
             setPage(currentPage);
 
         } catch (err) {
@@ -72,24 +69,25 @@ export const useFilteredVideoList = ({ type, initialPage = 1, pageSize = 10 }) =
         } finally {
             setLoading(false);
         }
-    }, [supabase, user, page, pageSize, keyword, type]);
+    }, [supabase, user, pageSize, keyword, type]);
 
     useEffect(() => {
-        fetchFilteredVideos();
-    }, [user, keyword, type, page]);
+        fetchFilteredVideos(1);
+    }, [user, keyword, type]);
 
     const loadMore = () => {
         if (!loading && hasMore) {
-            setPage(prevPage => prevPage + 1);
+            fetchFilteredVideos(page + 1);
         }
     };
 
     const refresh = () => {
-        fetchFilteredVideos(true);
+        fetchFilteredVideos(1);
     };
 
     const search = (newKeyword) => {
         setKeyword(newKeyword);
+        setPage(1);
     };
 
     return {
