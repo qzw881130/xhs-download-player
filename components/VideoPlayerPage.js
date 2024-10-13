@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { View, StyleSheet, Dimensions, Image, TouchableOpacity, PanResponder, TouchableWithoutFeedback, Animated, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Dimensions, Image, TouchableOpacity, PanResponder, TouchableWithoutFeedback, Animated, ActivityIndicator, Platform } from 'react-native';
 import { Appbar, IconButton, Text, Snackbar } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -535,12 +535,17 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: 100, // 调整这个值以适应你的需求
-        zIndex: 1
+        zIndex: 1,
+        borderWidth: 0,
+        borderColor: 'red'
     },
     header: {
         backgroundColor: 'transparent',
         elevation: 0,
         shadowOpacity: 0,
+        borderWidth: 0,
+        borderColor: 'green',
+        marginTop: Platform.OS === 'ios' ? -15 : 0
     },
     playButton: {
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
