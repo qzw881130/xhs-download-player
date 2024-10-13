@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSupabaseClient } from '../hooks/useSupabaseClient';
 
 const SupabaseContext = createContext(null);
@@ -8,27 +8,71 @@ export const SupabaseProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [session, setSession] = useState(null);
     const supabase = useSupabaseClient();
+
     useEffect(() => {
-        // 检查当前会话并设置用户
-        const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            setUser(session?.user || null);
+        const checkStoredSession = async () => {
+            const storedSession = await AsyncStorage.getItem('supabase.session');
+            if (storedSession) {
+                const sessionData = JSON.parse(storedSession);
+                const { data, error } = await supabase.auth.setSession(sessionData);
+                if (error) {
+                    console.error('Error restoring session:', error);
+                    await AsyncStorage.removeItem('supabase.session');
+                } else {
+                    setSession(data.session);
+                    setUser(data.user);
+                }
+            }
         };
 
-        checkSession();
+        checkStoredSession();
 
-        // 监听认证状态的变化
-        const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-            setUser(session?.user || null);
+        const { data: authListener } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+            setUser(newSession?.user || null);
+            setSession(newSession);
+
+            if (newSession) {
+                await AsyncStorage.setItem('supabase.session', JSON.stringify(newSession));
+            } else {
+                await AsyncStorage.removeItem('supabase.session');
+            }
         });
 
         return () => {
-            authListener?.unsubscribe();
+            if (authListener && typeof authListener.unsubscribe === 'function') {
+                authListener.unsubscribe();
+            }
         };
     }, []);
 
+    const login = async (email, password) => {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        return data;
+    };
+
+    const register = async (email, password) => {
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        return data;
+    };
+
+    const logout = async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+    };
+
+    const value = {
+        supabase,
+        user,
+        session,
+        login,
+        register,
+        logout
+    };
+
     return (
-        <SupabaseContext.Provider value={{ supabase, user, session }}>
+        <SupabaseContext.Provider value={value}>
             {children}
         </SupabaseContext.Provider>
     );

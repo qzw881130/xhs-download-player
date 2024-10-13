@@ -12,27 +12,17 @@ export default function LoginRegisterScreen() {
     const [rememberMe, setRememberMe] = useState(true);
     const [agreeToPrivacy, setAgreeToPrivacy] = useState(true);
     const navigation = useNavigation();
-    const { user, supabase } = useSupabase();
+    const { user, login, register } = useSupabase();
     const [visible, setVisible] = React.useState(false);
     const onToggleSnackBar = () => setVisible(!visible);
     const onDismissSnackBar = () => setVisible(false);
     const [error, setError] = useState('');
 
     useEffect(() => {
-        const checkAuthStatus = async () => {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            if (error) {
-                console.error('Error checking auth status:', error);
-                return;
-            }
-            if (session) {
-                navigation.navigate('MyLikes');
-            }
-        };
-
-        checkAuthStatus();
-    }, [navigation, supabase.auth]);
-
+        if (user) {
+            navigation.navigate('MyLikes');
+        }
+    }, [user, navigation]);
 
     useEffect(() => {
         const loadCredentials = async () => {
@@ -56,25 +46,20 @@ export default function LoginRegisterScreen() {
     const handleLogin = async () => {
         setLoading(true);
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) {
-                setVisible(true);
-                if (error.message == 'Invalid login credentials') setError('帐号密码错误或帐号不存在');
-                else setError(error.message);
+            await login(email, password);
+            if (rememberMe) {
+                await AsyncStorage.setItem('email', email);
+                await AsyncStorage.setItem('password', password);
+                await AsyncStorage.setItem('rememberMe', 'true');
             } else {
-                if (rememberMe) {
-                    await AsyncStorage.setItem('email', email);
-                    await AsyncStorage.setItem('password', password);
-                    await AsyncStorage.setItem('rememberMe', 'true');
-                } else {
-                    await AsyncStorage.removeItem('email');
-                    await AsyncStorage.removeItem('password');
-                    await AsyncStorage.setItem('rememberMe', 'false');
-                }
-                navigation.navigate('MyLikes');
+                await AsyncStorage.removeItem('email');
+                await AsyncStorage.removeItem('password');
+                await AsyncStorage.setItem('rememberMe', 'false');
             }
         } catch (error) {
-            alert(error.message);
+            setVisible(true);
+            if (error.message === 'Invalid login credentials') setError('帐号密码错误或帐号不存在');
+            else setError(error.message);
         } finally {
             setLoading(false);
         }
@@ -88,23 +73,19 @@ export default function LoginRegisterScreen() {
         }
         setLoading(true);
         try {
-            const { data, error } = await supabase.auth.signUp({ email, password });
-            if (error) {
-                alert(error.message);
+            await register(email, password);
+            if (rememberMe) {
+                await AsyncStorage.setItem('email', email);
+                await AsyncStorage.setItem('password', password);
+                await AsyncStorage.setItem('rememberMe', 'true');
             } else {
-                if (rememberMe) {
-                    await AsyncStorage.setItem('email', email);
-                    await AsyncStorage.setItem('password', password);
-                    await AsyncStorage.setItem('rememberMe', 'true');
-                } else {
-                    await AsyncStorage.removeItem('email');
-                    await AsyncStorage.removeItem('password');
-                    await AsyncStorage.setItem('rememberMe', 'false');
-                }
-                navigation.navigate('MyLikes');
+                await AsyncStorage.removeItem('email');
+                await AsyncStorage.removeItem('password');
+                await AsyncStorage.setItem('rememberMe', 'false');
             }
         } catch (error) {
-            alert(error.message);
+            setVisible(true);
+            setError(error.message);
         } finally {
             setLoading(false);
         }

@@ -28,7 +28,7 @@ export const AccountPage = () => {
     const handleLogout = async () => {
         try {
             await supabase.auth.signOut();
-            await AsyncStorage.clear();
+            // await AsyncStorage.clear();
             navigation.reset({
                 index: 0,
                 routes: [{ name: 'LoginRegister' }],
