@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, FlatList, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, FlatList, StyleSheet, Dimensions, TouchableOpacity, RefreshControl } from 'react-native';
 import { Appbar, Text, Card, Button, Menu, ActivityIndicator } from 'react-native-paper';
 import SearchModal from './SearchModal';
 import { useFilteredVideoList } from '../hooks/useFilteredVideoList';
@@ -27,6 +27,8 @@ export const VideoListPage = ({ title, type, onVideoPress }) => {
         setPage
     } = useFilteredVideoList({ type, pageSize: itemsPerPage });
 
+    const [refreshing, setRefreshing] = useState(false);
+
     console.log('count,pageSize,pages,page====', count, pageSize, pages, page);
 
     const renderItem = ({ item }) => (
@@ -40,10 +42,6 @@ export const VideoListPage = ({ title, type, onVideoPress }) => {
         </TouchableOpacity>
     );
 
-    const openMenu = () => setMenuVisible(true);
-    const closeMenu = () => setMenuVisible(false);
-    const pageOptions = Array.from({ length: pages }, (_, i) => i + 1);
-
     const handleSearch = (query) => {
         search(query);
     };
@@ -52,6 +50,12 @@ export const VideoListPage = ({ title, type, onVideoPress }) => {
         if (hasMore) {
             loadMore();
         }
+    };
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        await refresh();
+        setRefreshing(false);
     };
 
     if (loading && page === 1) {
@@ -84,43 +88,15 @@ export const VideoListPage = ({ title, type, onVideoPress }) => {
                 ListFooterComponent={() => (
                     loading && page > 1 ? <ActivityIndicator size="small" /> : null
                 )}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={handleRefresh}
+                        colors={["#0000ff"]}
+                        tintColor="#0000ff"
+                    />
+                }
             />
-            {/* {pages > 1 && (
-                <View style={styles.pagination}>
-                    <Button
-                        onPress={() => setPage(p => Math.max(1, p - 1))}
-                        disabled={page === 1 || loading}
-                    >
-                        上一页
-                    </Button>
-                    <Menu
-                        visible={menuVisible}
-                        onDismiss={closeMenu}
-                        anchor={
-                            <Button onPress={openMenu} disabled={loading}>
-                                {`第 ${page} 页`}
-                            </Button>
-                        }
-                    >
-                        {pageOptions.map((p) => (
-                            <Menu.Item
-                                key={p}
-                                onPress={() => {
-                                    setPage(p);
-                                    closeMenu();
-                                }}
-                                title={`第 ${p} 页`}
-                            />
-                        ))}
-                    </Menu>
-                    <Button
-                        onPress={() => setPage(p => Math.min(pages, p + 1))}
-                        disabled={page === pages || loading}
-                    >
-                        下一页
-                    </Button>
-                </View>
-            )} */}
             <SearchModal
                 visible={searchVisible}
                 onDismiss={() => setSearchVisible(false)}
