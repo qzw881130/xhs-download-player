@@ -6,7 +6,7 @@ export const useVideoOperations = () => {
     const hideVideo = async (vid) => {
         try {
             const { data, error } = await supabase
-                .from('xhs-video')
+                .from('videos')
                 .update({ is_hidden: true })
                 .eq('user_id', user.id)
                 .eq('vid', vid);
