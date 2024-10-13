@@ -530,8 +530,8 @@ export const VideoPlayerPage = ({ srcVideo, onClose }) => {
                         <Text>是否确定永远隐藏该视频？</Text>
                     </Dialog.Content>
                     <Dialog.Actions>
-                        <Button onPress={() => setHideDialogVisible(false)}>放弃</Button>
-                        <Button onPress={handleHideConfirm}>是</Button>
+                        <Button onPress={handleHideConfirm}>永远隐藏</Button>
+                        <Button onPress={() => setHideDialogVisible(false)}>不隐藏</Button>
                     </Dialog.Actions>
                 </Dialog>
             </Portal>

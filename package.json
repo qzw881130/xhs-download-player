@@ -8,9 +8,11 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "prebuild-ios": "expo prebuild --clean -p ios",
+    "prebuild-android": "expo prebuild --clean -p android",
     "push-env": "eas secret:push",
     "package-ios": "eas build -p ios",
     "package-ios-local": "eas build -p ios --local",
+    "package-ios-android": "eas build -p android --local",
     "doctor": "npx expo-doctor"
   },
   "dependencies": {
