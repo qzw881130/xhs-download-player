@@ -3,6 +3,13 @@
 ## Downloader 
 please visit [https://github.com/qzw881130/xhs-download-videos](https://github.com/qzw881130/xhs-download-videos)
 
+## Demonstration
+<p><img src='demo/IMG_1.PNG' width="550" /></p>
+<p><img src='demo/IMG_2.PNG' width="550" /></p>
+<p><img src='demo/IMG_3.PNG' width="550" /></p>
+<p><img src='demo/IMG_4.PNG' width="550" /></p>
+<p><img src='demo/IMG_5.PNG' width="550" /></p>
+
 ## Installation
 1. Create .env in code root
 
