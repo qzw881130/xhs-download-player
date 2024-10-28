@@ -47,6 +47,10 @@ magick bc3b84d22bb3fc69f9ad235b8bdfe50d.jpg -resize "1284\!x2778\!" splash_car.p
 magick icon-red-leaf.png  -resize "48\!x48\!" favicon.png
 ```
 
+## Contact me
+* Mail: qianzhiwei5921@gmail.com
+* Telegram group: [https://t.me/xhs_video_downloader](https://t.me/xhs_video_downloader)
+
 ## Reference
 
 * [Download image](https://www.pinterest.com/pin/625578204504140036/)
