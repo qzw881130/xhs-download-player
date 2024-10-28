@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# 获取当前分支名称
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+# 检查当前分支是否为 'main'
+if [ "$current_branch" != "dev" ]; then
+    echo "当前分支不是 main，请切换到 main 分支再执行脚本"
+    exit 1
+fi
+
+
+git add .
+git commit -m "update"
+git push origin dev

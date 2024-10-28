@@ -1,21 +1,40 @@
 import React, { useState } from 'react';
-import { View, FlatList, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
-import { Appbar, Searchbar, Text, Card, Button } from 'react-native-paper';
+import { View, FlatList, StyleSheet, Dimensions, TouchableOpacity, RefreshControl } from 'react-native';
+import { Appbar, Text, Card, Button, Menu, ActivityIndicator } from 'react-native-paper';
+import SearchModal from './SearchModal';
+import { useFilteredVideoList } from '../hooks/useFilteredVideoList';
 
 const { width } = Dimensions.get('window');
-const COLUMN_WIDTH = (width - 24) / 2; // 24 is the total horizontal padding
+const COLUMN_WIDTH = (width - 24) / 2;
 
-export const VideoListPage = ({ title, count, data, onVideoPress }) => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [page, setPage] = useState(1);
-    const itemsPerPage = 10; // 假设每页显示10个项目
+export const VideoListPage = ({ title, type, onVideoPress }) => {
+    const [menuVisible, setMenuVisible] = useState(false);
+    const [searchVisible, setSearchVisible] = useState(false);
+    const itemsPerPage = 10;
 
-    const onChangeSearch = query => setSearchQuery(query);
+    const {
+        filteredData,
+        loading,
+        error,
+        hasMore,
+        loadMore,
+        refresh,
+        search,
+        count,
+        pageSize,
+        pages,
+        page,
+        setPage
+    } = useFilteredVideoList({ type, pageSize: itemsPerPage });
+
+    const [refreshing, setRefreshing] = useState(false);
+
+    console.log('count,pageSize,pages,page====', count, pageSize, pages, page);
 
     const renderItem = ({ item }) => (
         <TouchableOpacity onPress={() => onVideoPress(item)}>
             <Card style={styles.card}>
-                <Card.Cover source={{ uri: item.image }} style={styles.cardImage} />
+                <Card.Cover source={{ uri: item.image_src || 'https://via.placeholder.com/150x200' }} style={styles.cardImage} />
                 <Card.Content>
                     <Text numberOfLines={2} style={styles.cardTitle}>{item.title}</Text>
                 </Card.Content>
@@ -23,46 +42,68 @@ export const VideoListPage = ({ title, count, data, onVideoPress }) => {
         </TouchableOpacity>
     );
 
-    const totalPages = Math.ceil(data.length / itemsPerPage);
+    const handleSearch = (query) => {
+        search(query);
+    };
+
+    const handleLoadMore = () => {
+        if (hasMore) {
+            loadMore();
+        }
+    };
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        await refresh();
+        setRefreshing(false);
+    };
+
+    if (loading && page === 1) {
+        return (
+            <View style={styles.container}>
+                <Appbar.Header>
+                    <Appbar.Content title={title} />
+                    <Appbar.Action icon="magnify" onPress={() => setSearchVisible(true)} />
+                </Appbar.Header>
+                <ActivityIndicator animating={true} size="large" />
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
             <Appbar.Header>
-                <Appbar.Content title={title} subtitle={count > 0 ? `共${count}个` : undefined} />
+                <Appbar.Content title={title + `（共${count}个)`} />
+                <Appbar.Action icon="magnify" onPress={() => setSearchVisible(true)} />
             </Appbar.Header>
-            {title !== "关于" && (
-                <Searchbar
-                    placeholder="搜索"
-                    onChangeText={onChangeSearch}
-                    value={searchQuery}
-                    style={styles.searchbar}
-                />
-            )}
             <FlatList
-                data={data.slice((page - 1) * itemsPerPage, page * itemsPerPage)}
+                data={filteredData}
                 renderItem={renderItem}
                 keyExtractor={item => item.id}
                 numColumns={2}
                 columnWrapperStyle={styles.row}
                 ListEmptyComponent={<Text style={styles.emptyText}>暂无数据</Text>}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.1}
+                ListFooterComponent={() => (
+                    loading && page > 1 ? <ActivityIndicator size="small" /> : null
+                )}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={handleRefresh}
+                        colors={["#0000ff"]}
+                        tintColor="#0000ff"
+                    />
+                }
             />
-            {totalPages > 1 && (
-                <View style={styles.pagination}>
-                    <Button
-                        onPress={() => setPage(p => Math.max(1, p - 1))}
-                        disabled={page === 1}
-                    >
-                        上一页
-                    </Button>
-                    <Text>{`第 ${page} 页，共 ${totalPages} 页`}</Text>
-                    <Button
-                        onPress={() => setPage(p => Math.min(totalPages, p + 1))}
-                        disabled={page === totalPages}
-                    >
-                        下一页
-                    </Button>
-                </View>
-            )}
+            <SearchModal
+                visible={searchVisible}
+                onDismiss={() => setSearchVisible(false)}
+                onVideoPress={onVideoPress}
+                type={type}
+                onSearch={handleSearch}
+            />
         </View>
     );
 };
@@ -70,9 +111,6 @@ export const VideoListPage = ({ title, count, data, onVideoPress }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
-    searchbar: {
-        margin: 8,
     },
     row: {
         justifyContent: 'space-between',
@@ -83,7 +121,7 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     cardImage: {
-        height: COLUMN_WIDTH * 1.5, // 假设图片比例为2:3
+        height: COLUMN_WIDTH * 1.5,
     },
     cardTitle: {
         fontSize: 14,

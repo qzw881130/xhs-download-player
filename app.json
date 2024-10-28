@@ -1,27 +1,70 @@
 {
   "expo": {
-    "name": "XhsDownloadPlayer",
+    "name": "XHS Player",
     "slug": "XhsDownloadPlayer",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.qianzhiwei5921.XhsDownloadPlayer",
+      "buildNumber": "23",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio"
+        ],
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
+        "NSPrivacyCollectedDataTypes": [
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeEmailAddress",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAccountManagement"
+            ]
+          }
+        ]
+      }
     },
     "android": {
+      "package": "com.qianzhiwei5921.XhsDownloadPlayer",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "backgroundColor": "#FFFFFF"
+      },
+      "permissions": [
+        "FOREGROUND_SERVICE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "supabaseUrl": "@env:SUPABASE_URL",
+      "supabaseAnonKey": "@env:SUPABASE_ANON_KEY",
+      "eas": {
+        "projectId": "346240cd-c217-47e4-aa08-b1976a9a4279"
+      }
+    },
+    "plugins": [
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
+        }
+      ]
+    ],
+    "privacyPolicyUrl": "https://qzw881130.github.io/files/xhs-download-video/privacy-policy.html"
   }
 }
