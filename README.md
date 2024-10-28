@@ -1,6 +1,6 @@
 # xhs-video-player
 
-## downloader 
+## Downloader 
 please visit [https://github.com/qzw881130/xhs-download-videos](https://github.com/qzw881130/xhs-download-videos)
 
 ## Installation
